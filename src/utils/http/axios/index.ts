@@ -11,12 +11,12 @@ import { useGlobSetting } from '/@/hooks/setting';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { RequestEnum, ResultEnum, ContentTypeEnum } from '/@/enums/httpEnum';
 import { isString, isUnDef, isNull, isEmpty } from '/@/utils/is';
-import { getToken } from '/@/utils/auth';
+import { getExpireTime, getReFreshToken, getToken } from '/@/utils/auth';
 import { setObjToUrlParams, deepMerge } from '/@/utils';
 import { useErrorLogStoreWithOut } from '/@/store/modules/errorLog';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { joinTimestamp, formatRequestDate } from './helper';
-import { useUserStoreWithOut } from '/@/store/modules/user';
+import { useUserStore } from '/@/store/modules/user';
 import { AxiosRetry } from '/@/utils/http/axios/axiosRetry';
 import axios from 'axios';
 
@@ -51,12 +51,12 @@ const transform: AxiosTransform = {
       throw new Error(t('sys.api.apiRequestFailed'));
     }
     //  这里 code，result，message为 后台统一的字段，需要在 types.ts内修改为项目自己的接口返回格式
-    const { code, result, message } = data;
+    const { msg } = data;
 
     // 这里逻辑可以根据项目进行修改
-    const hasSuccess = data && Reflect.has(data, 'code') && code === ResultEnum.SUCCESS;
+    const hasSuccess = res.status === 200;
     if (hasSuccess) {
-      let successMsg = message;
+      let successMsg = msg;
 
       if (isNull(successMsg) || isUnDef(successMsg) || isEmpty(successMsg)) {
         successMsg = t(`sys.api.operationSuccess`);
@@ -67,22 +67,19 @@ const transform: AxiosTransform = {
       } else if (options.successMessageMode === 'message') {
         createMessage.success(successMsg);
       }
-      return result;
+      return data.data;
     }
 
     // 在此处根据自己项目的实际情况对不同的code执行不同的操作
     // 如果不希望中断当前请求，请return数据，否则直接抛出异常即可
     let timeoutMsg = '';
-    switch (code) {
+    switch (res.status) {
       case ResultEnum.TIMEOUT:
         timeoutMsg = t('sys.api.timeoutMessage');
-        const userStore = useUserStoreWithOut();
-        userStore.setToken(undefined);
-        userStore.logout(true);
         break;
       default:
-        if (message) {
-          timeoutMsg = message;
+        if (msg) {
+          timeoutMsg = msg;
         }
     }
 
@@ -153,14 +150,27 @@ const transform: AxiosTransform = {
   /**
    * @description: 请求拦截器处理
    */
-  requestInterceptors: (config, options) => {
+  requestInterceptors: async (config, options) => {
+    // 请求之前处理config
+    const expireTime = getExpireTime();
+    if (expireTime !== 0 && (config as Recordable)?.requestOptions?.withToken !== false) {
+      const left = expireTime - new Date().getTime();
+      const refreshToken = getReFreshToken();
+      // 5 * 60 * 1000 5 分钟 86339000 测试刷新token
+      if (left < 5 * 60 * 1000 && refreshToken) {
+        const userStore = useUserStore();
+        await userStore.refreshTokenFn();
+      }
+    }
     // 请求之前处理config
     const token = getToken();
-    if (token && (config as Recordable)?.requestOptions?.withToken !== false) {
-      // jwt token
-      (config as Recordable).headers.Authorization = options.authenticationScheme
-        ? `${options.authenticationScheme} ${token}`
-        : token;
+    if (token) {
+      if (token && (config as Recordable)?.requestOptions?.withToken !== false) {
+        // jwt token
+        (config as Recordable).headers.Authorization = options.authenticationScheme
+          ? `${options.authenticationScheme} ${token}`
+          : token;
+      }
     }
     return config;
   },
@@ -181,7 +191,7 @@ const transform: AxiosTransform = {
     errorLogStore.addAjaxErrorInfo(error);
     const { response, code, message, config } = error || {};
     const errorMessageMode = config?.requestOptions?.errorMessageMode || 'none';
-    const msg: string = response?.data?.error?.message ?? '';
+    const msg: string = response?.data?.msg ?? '';
     const err: string = error?.toString?.() ?? '';
     let errMessage = '';
 
@@ -206,10 +216,16 @@ const transform: AxiosTransform = {
         return Promise.reject(error);
       }
     } catch (error) {
+      if (msg != '') {
+        throw new Error(response);
+      }
       throw new Error(error as unknown as string);
     }
 
     checkStatus(error?.response?.status, msg, errorMessageMode);
+    if (msg != '') {
+      return Promise.reject(response);
+    }
 
     // 添加自动重试机制 保险起见 只针对GET请求
     const retryRequest = new AxiosRetry();
@@ -230,7 +246,7 @@ function createAxios(opt?: Partial<CreateAxiosOptions>) {
         // See https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication#authentication_schemes
         // authentication schemes，e.g: Bearer
         // authenticationScheme: 'Bearer',
-        authenticationScheme: '',
+        authenticationScheme: 'Bearer',
         timeout: 10 * 1000,
         // 基础接口地址
         // baseURL: globSetting.apiUrl,
@@ -276,6 +292,21 @@ function createAxios(opt?: Partial<CreateAxiosOptions>) {
   );
 }
 export const defHttp = createAxios();
+
+export const defNoTokenHttp = createAxios({
+  requestOptions: {
+    // 是否携带token
+    withToken: false,
+    isTransformResponse: false,
+  },
+});
+
+export const defHttpWithTransform = createAxios({
+  requestOptions: {
+    // 需要对返回数据进行处理
+    isTransformResponse: true,
+  },
+});
 
 // other api url
 // export const otherHttp = createAxios({

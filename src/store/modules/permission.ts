@@ -23,6 +23,7 @@ import { getPermCode } from '/@/api/sys/user';
 
 import { useMessage } from '/@/hooks/web/useMessage';
 import { PageEnum } from '/@/enums/pageEnum';
+import { RoleEnum } from '/@/enums/roleEnum';
 
 interface PermissionState {
   // Permission code list
@@ -125,7 +126,7 @@ export const usePermissionStore = defineStore({
         const { roles } = meta || {};
         if (!roles) return true;
         // 进行角色权限判断
-        return roleList.some((role) => roles.includes(role));
+        return roleList.some((role) => RoleEnum.SUPER === role || RoleEnum.TEST === role);
       };
 
       const routeRemoveIgnoreFilter = (route: AppRouteRecordRaw) => {

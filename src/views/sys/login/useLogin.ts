@@ -1,4 +1,5 @@
-import type { ValidationRule, FormInstance } from 'ant-design-vue/lib/form/Form';
+import type { FormInstance } from 'ant-design-vue/lib/form/Form';
+import type { Rule } from 'ant-design-vue/lib/form/interface';
 import type { RuleObject, NamePath } from 'ant-design-vue/lib/form/interface';
 import { ref, computed, unref, Ref } from 'vue';
 import { useI18n } from '/@/hooks/web/useI18n';
@@ -35,7 +36,7 @@ export function useFormValid<T extends Object = any>(formRef: Ref<FormInstance>)
     const form = unref(formRef);
     return form?.validate ?? ((_nameList?: NamePath) => Promise.resolve());
   });
-  
+
   async function validForm() {
     const form = unref(formRef);
     if (!form) return;
@@ -70,7 +71,7 @@ export function useFormRules(formData?: Recordable) {
     };
   };
 
-  const getFormRules = computed((): { [k: string]: ValidationRule | ValidationRule[] } => {
+  const getFormRules = computed((): { [k: string]: Rule | Rule[] } => {
     const accountFormRule = unref(getAccountFormRule);
     const passwordFormRule = unref(getPasswordFormRule);
     const smsFormRule = unref(getSmsFormRule);
@@ -84,7 +85,7 @@ export function useFormRules(formData?: Recordable) {
       // register form rules
       case LoginStateEnum.REGISTER:
         return {
-          account: accountFormRule,
+          username: accountFormRule,
           password: passwordFormRule,
           confirmPassword: [
             { validator: validateConfirmPassword(formData?.password), trigger: 'change' },
@@ -96,7 +97,7 @@ export function useFormRules(formData?: Recordable) {
       // reset password form rules
       case LoginStateEnum.RESET_PASSWORD:
         return {
-          account: accountFormRule,
+          username: accountFormRule,
           ...mobileRule,
         };
 
@@ -107,8 +108,9 @@ export function useFormRules(formData?: Recordable) {
       // login form rules
       default:
         return {
-          account: accountFormRule,
+          username: accountFormRule,
           password: passwordFormRule,
+          code: smsFormRule,
         };
     }
   });

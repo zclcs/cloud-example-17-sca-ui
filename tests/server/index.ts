@@ -32,7 +32,6 @@ app.ws.use(
         });
         ctx.websocket.send(data);
       }
-      console.log(message);
     });
   }),
 );

@@ -5,6 +5,7 @@ import ECB from 'crypto-js/mode-ecb';
 import md5 from 'crypto-js/md5';
 import UTF8 from 'crypto-js/enc-utf8';
 import Base64 from 'crypto-js/enc-base64';
+import * as CryptoJS from 'crypto-js';
 
 export interface EncryptionParams {
   key: string;
@@ -41,6 +42,21 @@ export class AesEncryption {
     return decrypt(cipherText, this.key, this.getOptions).toString(UTF8);
   }
 }
+
+/**
+ *加密处理
+ */
+export const encryption = (encodeKey: string, text: string) => {
+  const key = CryptoJS.enc.Latin1.parse(encodeKey);
+  const iv = key;
+  // 加密
+  const encrypted = CryptoJS.AES.encrypt(text, key, {
+    iv: iv,
+    mode: CryptoJS.mode.CFB,
+    padding: CryptoJS.pad.NoPadding,
+  });
+  return encrypted.toString();
+};
 
 export function encryptByBase64(cipherText: string) {
   return UTF8.parse(cipherText).toString(Base64);

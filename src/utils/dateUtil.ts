@@ -5,12 +5,17 @@ import dayjs from 'dayjs';
 
 const DATE_TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 const DATE_FORMAT = 'YYYY-MM-DD';
+const TIME_FORMAT = 'HH:mm:ss';
 
 export function formatToDateTime(date?: dayjs.ConfigType, format = DATE_TIME_FORMAT): string {
   return dayjs(date).format(format);
 }
 
 export function formatToDate(date?: dayjs.ConfigType, format = DATE_FORMAT): string {
+  return dayjs(date).format(format);
+}
+
+export function formatToTime(date?: dayjs.ConfigType, format = TIME_FORMAT): string {
   return dayjs(date).format(format);
 }
 

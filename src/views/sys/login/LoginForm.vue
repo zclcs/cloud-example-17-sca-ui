@@ -8,10 +8,10 @@
     v-show="getShow"
     @keypress.enter="handleLogin"
   >
-    <FormItem name="account" class="enter-x">
+    <FormItem name="username" class="enter-x">
       <Input
         size="large"
-        v-model:value="formData.account"
+        v-model:value="formData.username"
         :placeholder="t('sys.login.userName')"
         class="fix-auto-fill"
       />
@@ -24,7 +24,28 @@
         :placeholder="t('sys.login.password')"
       />
     </FormItem>
-
+    <ARow class="enter-x">
+      <ACol :span="12">
+        <FormItem name="code">
+          <Input
+            size="large"
+            v-model:value="formData.code"
+            :placeholder="t('sys.login.smsPlaceholder')"
+            class="fix-auto-fill"
+          />
+        </FormItem>
+      </ACol>
+      <ACol :span="12">
+        <FormItem name="codeUrl" :style="{ 'text-align': 'right' }">
+          <Image
+            height="100%"
+            :preview="formData.preview"
+            @click="handleChangeCode"
+            :src="formData.codeUrl"
+          />
+        </FormItem>
+      </ACol>
+    </ARow>
     <ARow class="enter-x">
       <ACol :span="12">
         <FormItem>
@@ -82,9 +103,8 @@
   </Form>
 </template>
 <script lang="ts" setup>
-  import { reactive, ref, unref, computed } from 'vue';
-
-  import { Checkbox, Form, Input, Row, Col, Button, Divider } from 'ant-design-vue';
+  import { reactive, ref, toRaw, unref, computed } from 'vue';
+  import { Checkbox, Form, Input, Row, Col, Button, Divider, Image } from 'ant-design-vue';
   import {
     GithubFilled,
     WechatFilled,
@@ -100,6 +120,8 @@
   import { useUserStore } from '/@/store/modules/user';
   import { LoginStateEnum, useLoginState, useFormRules, useFormValid } from './useLogin';
   import { useDesign } from '/@/hooks/web/useDesign';
+  import { buildUUID } from '/@/utils/uuid';
+  import { useGlobSetting } from '/@/hooks/setting';
   //import { onKeyStroke } from '@vueuse/core';
 
   const ACol = Col;
@@ -117,10 +139,16 @@
   const formRef = ref();
   const loading = ref(false);
   const rememberMe = ref(false);
+  let uuid = buildUUID();
+  const globSetting = useGlobSetting();
 
   const formData = reactive({
-    account: 'vben',
-    password: '123456',
+    username: '',
+    password: '',
+    code: '',
+    randomStr: uuid,
+    codeUrl: handleCodeUrl(uuid),
+    preview: false,
   });
 
   const { validForm } = useFormValid(formRef);
@@ -129,16 +157,32 @@
 
   const getShow = computed(() => unref(getLoginState) === LoginStateEnum.LOGIN);
 
+  function handleChangeCode() {
+    uuid = buildUUID();
+    formData.randomStr = uuid;
+    formData.codeUrl = handleCodeUrl(uuid);
+  }
+
+  function handleCodeUrl(uuid: string) {
+    return globSetting.apiUrl + '/code?randomStr=' + uuid;
+  }
+
   async function handleLogin() {
     const data = await validForm();
     if (!data) return;
     try {
       loading.value = true;
-      const userInfo = await userStore.login({
-        password: data.password,
-        username: data.account,
-        mode: 'none', //不要默认的错误提示
-      });
+      const userInfo = await userStore.login(
+        toRaw({
+          grant_type: 'password',
+          scope: 'server',
+          username: formData.username,
+          password: formData.password,
+          randomStr: formData.randomStr,
+          code: formData.code,
+          mode: 'none', //不要默认的错误提示
+        }),
+      );
       if (userInfo) {
         notification.success({
           message: t('sys.login.loginSuccessTitle'),
@@ -147,9 +191,12 @@
         });
       }
     } catch (error) {
+      if (error.data.msg === '验证码已过期') {
+        handleChangeCode();
+      }
       createErrorModal({
         title: t('sys.api.errorTip'),
-        content: (error as unknown as Error).message || t('sys.api.networkExceptionMsg'),
+        content: error.data.msg || t('sys.api.networkExceptionMsg'),
         getContainer: () => document.body.querySelector(`.${prefixCls}`) || document.body,
       });
     } finally {

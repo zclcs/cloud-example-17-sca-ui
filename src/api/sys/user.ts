@@ -1,24 +1,29 @@
-import { defHttp } from '/@/utils/http/axios';
-import { LoginParams, LoginResultModel, GetUserInfoModel } from './model/userModel';
+import { defHttp, defNoTokenHttp, defHttpWithTransform } from '/@/utils/http/axios';
+import { LoginResultModel, GetUserInfoModel, RefreshTokenParams } from './model/userModel';
 
 import { ErrorMessageMode } from '/#/axios';
+import { ContentTypeEnum } from '/@/enums/httpEnum';
 
 enum Api {
-  Login = '/login',
-  Logout = '/logout',
-  GetUserInfo = '/getUserInfo',
-  GetPermCode = '/getPermCode',
-  TestRetry = '/testRetry',
+  Login = '/auth/oauth2/token',
+  Logout = '/auth/token/logout',
+  GetUserInfo = '/system/user/info',
+  GetPermCode = '/system/menu/permissions',
 }
 
 /**
  * @description: user login api
  */
-export function loginApi(params: LoginParams, mode: ErrorMessageMode = 'modal') {
-  return defHttp.post<LoginResultModel>(
+export function loginApi(params: object, data: object, mode: ErrorMessageMode = 'modal') {
+  return defNoTokenHttp.post<LoginResultModel>(
     {
       url: Api.Login,
+      headers: {
+        authorization: 'Basic emNsY3M6MTIzNDU2',
+        'Content-Type': ContentTypeEnum.FORM_URLENCODED,
+      },
       params,
+      data,
     },
     {
       errorMessageMode: mode,
@@ -30,26 +35,28 @@ export function loginApi(params: LoginParams, mode: ErrorMessageMode = 'modal') 
  * @description: getUserInfo
  */
 export function getUserInfo() {
-  return defHttp.get<GetUserInfoModel>({ url: Api.GetUserInfo }, { errorMessageMode: 'none' });
+  return defHttpWithTransform.get<GetUserInfoModel>({ url: Api.GetUserInfo });
 }
 
+/**
+ * 获取权限
+ * @returns 权限
+ */
 export function getPermCode() {
-  return defHttp.get<string[]>({ url: Api.GetPermCode });
+  return defHttpWithTransform.get<string[]>({ url: Api.GetPermCode });
+}
+
+export function refreshTokenApi(params: RefreshTokenParams) {
+  return defNoTokenHttp.post<LoginResultModel>({
+    url: Api.Login,
+    headers: {
+      authorization: 'Basic emNsY3M6MTIzNDU2',
+      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
+    },
+    params,
+  });
 }
 
 export function doLogout() {
-  return defHttp.get({ url: Api.Logout });
-}
-
-export function testRetry() {
-  return defHttp.get(
-    { url: Api.TestRetry },
-    {
-      retryRequest: {
-        isOpenRetry: true,
-        count: 5,
-        waitTime: 1000,
-      },
-    },
-  );
+  return defHttp.delete({ url: Api.Logout });
 }
