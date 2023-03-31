@@ -1,5 +1,5 @@
 <template>
-  <a-tree-select v-bind="getAttrs" @change="handleChange">
+  <a-tree-select v-bind="getAttrs" @change="handleChange" @dropdown-visible-change="handleFetch">
     <template #[item]="data" v-for="item in Object.keys($slots)">
       <slot :name="item" v-bind="data || {}"></slot>
     </template>
@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts">
-  import { computed, defineComponent, watch, ref, onMounted, unref } from 'vue';
+  import { computed, defineComponent, watch, ref, watchEffect, onMounted, unref } from 'vue';
   import { TreeSelect } from 'ant-design-vue';
   import { isArray, isFunction } from '/@/utils/is';
   import { get } from 'lodash-es';
@@ -23,6 +23,7 @@
       api: { type: Function as PropType<(arg?: Recordable) => Promise<Recordable>> },
       params: { type: Object },
       immediate: { type: Boolean, default: true },
+      alwaysLoad: propTypes.bool.def(false),
       resultField: propTypes.string.def(''),
     },
     emits: ['options-change', 'change'],
@@ -40,6 +41,10 @@
       function handleChange(...args) {
         emit('change', ...args);
       }
+
+      watchEffect(() => {
+        props.immediate && !props.alwaysLoad && fetch();
+      });
 
       watch(
         () => props.params,
@@ -80,7 +85,18 @@
         isFirstLoaded.value = true;
         emit('options-change', treeData.value);
       }
-      return { getAttrs, loading, handleChange };
+
+      async function handleFetch(visible) {
+        if (visible) {
+          if (props.alwaysLoad) {
+            await fetch();
+          } else if (!props.immediate && unref(isFirstLoaded)) {
+            await fetch();
+            isFirstLoaded.value = false;
+          }
+        }
+      }
+      return { getAttrs, loading, handleFetch, handleChange };
     },
   });
 </script>

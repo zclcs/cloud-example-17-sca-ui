@@ -14,8 +14,7 @@
   import { PageWrapper } from '/@/components/Page';
   import { BasicForm, useForm } from '/@/components/Form';
   import { minePasswordApi } from '/@/api/cloud/user';
-  import { router } from '/@/router';
-  import { PageEnum } from '/@/enums/pageEnum';
+  import { useUserStoreWithOut } from '/@/store/modules/user';
 
   import { formSchema } from './pwd.data';
   export default defineComponent({
@@ -24,17 +23,22 @@
     setup() {
       const [register, { validate, resetFields }] = useForm({
         size: 'large',
+        baseColProps: { span: 24 },
         labelWidth: 100,
         showActionButtonGroup: false,
         schemas: formSchema,
       });
 
       async function handleSubmit() {
-        try {
-          const values = await validate();
-          await minePasswordApi(values.passwordNew);
-          router.push(PageEnum.BASE_LOGIN);
-        } catch (error) {}
+        const values = await validate();
+        await minePasswordApi(values.passwordNew)
+          .then(() => {})
+          .catch((err) => {
+            if (!err.data) {
+              const userStore = useUserStoreWithOut();
+              userStore.logout(true);
+            }
+          });
       }
 
       return { register, resetFields, handleSubmit };

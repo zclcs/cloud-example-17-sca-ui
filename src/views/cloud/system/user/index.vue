@@ -92,7 +92,7 @@
           return info;
         },
         actionColumn: {
-          width: 120,
+          width: 150,
           title: '操作',
           dataIndex: 'action',
           ifShow:

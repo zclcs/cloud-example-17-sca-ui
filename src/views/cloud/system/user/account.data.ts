@@ -1,4 +1,10 @@
-import { getAllRoleList, isUserExist, getDeptTree, getDeptList } from '/@/api/cloud/system';
+import {
+  getRoleOptions,
+  checkUsername,
+  checkUserMobile,
+  getDeptTree,
+  getDeptOptions,
+} from '/@/api/cloud/system';
 import { checkUserPasswordApi } from '/@/api/cloud/user';
 import { BasicColumn } from '/@/components/Table';
 import { FormSchema } from '/@/components/Table';
@@ -21,6 +27,11 @@ export const columns: BasicColumn[] = [
     width: 80,
   },
   {
+    title: '手机号',
+    dataIndex: 'mobile',
+    width: 120,
+  },
+  {
     title: '邮箱',
     dataIndex: 'email',
     width: 120,
@@ -31,7 +42,7 @@ export const columns: BasicColumn[] = [
   },
   {
     title: '创建时间',
-    dataIndex: 'createTime',
+    dataIndex: 'createAt',
     width: 180,
   },
 ];
@@ -66,22 +77,15 @@ export const accountFormSchema: FormSchema[] = [
           validator: (_, value) => {
             return new Promise((resolve, reject) => {
               const { userId } = values;
-              if (!userId) {
-                return resolve();
-              }
               if (!value) {
                 return reject('用户名不能为空');
               }
-              isUserExist(userId, value)
-                .then((res) => {
-                  if (res) {
-                    return reject('用户名已被使用');
-                  } else {
-                    return resolve();
-                  }
+              checkUsername({ userId: userId, username: value })
+                .then(() => {
+                  return resolve();
                 })
                 .catch((error) => {
-                  return reject(error.msg || '验证失败');
+                  return reject(error.data.msg || '验证失败');
                 });
             });
           },
@@ -90,10 +94,15 @@ export const accountFormSchema: FormSchema[] = [
     },
   },
   {
+    field: 'realName',
+    label: '用户昵称',
+    component: 'Input',
+    required: true,
+  },
+  {
     field: 'password',
     label: '密码',
     component: 'InputPassword',
-    required: true,
     ifShow: false,
   },
   {
@@ -101,10 +110,12 @@ export const accountFormSchema: FormSchema[] = [
     field: 'roleIds',
     component: 'ApiSelect',
     componentProps: {
-      api: getAllRoleList,
+      api: getRoleOptions,
       mode: 'multiple',
       labelField: 'roleName',
       valueField: 'roleId',
+      immediate: true,
+      alwaysLoad: true,
     },
     required: true,
   },
@@ -114,11 +125,13 @@ export const accountFormSchema: FormSchema[] = [
     component: 'ApiTreeSelect',
     componentProps: {
       api: getDeptTree,
-      replaceFields: {
+      fieldNames: {
         title: 'label',
         key: 'id',
         value: 'id',
       },
+      immediate: true,
+      alwaysLoad: true,
       getPopupContainer: () => document.body,
     },
     required: true,
@@ -128,10 +141,12 @@ export const accountFormSchema: FormSchema[] = [
     field: 'deptIds',
     component: 'ApiSelect',
     componentProps: {
-      api: getDeptList,
+      api: getDeptOptions,
       mode: 'multiple',
       labelField: 'deptName',
       valueField: 'deptId',
+      immediate: true,
+      alwaysLoad: true,
     },
     required: true,
   },
@@ -142,12 +157,42 @@ export const accountFormSchema: FormSchema[] = [
     component: 'ApiSelect',
     componentProps: {
       api: getDict,
-      params: { dict: 'user_status' },
-      resultField: 'children',
+      params: { dictName: 'system_user.status' },
       labelField: 'title',
       valueField: 'value',
+      immediate: true,
+      alwaysLoad: true,
     },
     defaultValue: '1',
+  },
+  {
+    field: 'mobile',
+    label: '手机号',
+    component: 'Input',
+    helpMessage: ['手机号不能重复'],
+    dynamicRules: ({ values }) => {
+      return [
+        {
+          required: false,
+          trigger: 'change',
+          validator: (_, value) => {
+            return new Promise((resolve, reject) => {
+              const { userId } = values;
+              if (!value) {
+                return resolve();
+              }
+              checkUserMobile({ userId: userId, mobile: value })
+                .then(() => {
+                  return resolve();
+                })
+                .catch((error) => {
+                  return reject(error.data.msg || '验证失败');
+                });
+            });
+          },
+        },
+      ];
+    },
   },
   {
     label: '邮箱',

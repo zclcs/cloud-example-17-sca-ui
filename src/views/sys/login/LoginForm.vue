@@ -191,14 +191,14 @@
         });
       }
     } catch (error) {
-      if (error.data.msg === '验证码已过期') {
-        handleChangeCode();
-      }
       createErrorModal({
         title: t('sys.api.errorTip'),
         content: error.data.msg || t('sys.api.networkExceptionMsg'),
         getContainer: () => document.body.querySelector(`.${prefixCls}`) || document.body,
       });
+      if (error.data.msg === '验证码已过期') {
+        handleChangeCode();
+      }
     } finally {
       loading.value = false;
     }

@@ -19,11 +19,13 @@
       const isUpdate = ref(true);
       const rowId = ref('');
 
-      const [registerForm, { resetFields, setFieldsValue, updateSchema, validate }] = useForm({
-        labelWidth: 100,
-        schemas: formSchema,
-        showActionButtonGroup: false,
-      });
+      const [registerForm, { resetFields, setFieldsValue, updateSchema, validate, clearValidate }] =
+        useForm({
+          baseColProps: { span: 24 },
+          labelWidth: 100,
+          schemas: formSchema,
+          showActionButtonGroup: false,
+        });
 
       const [registerModal, { setModalProps, closeModal }] = useModalInner(async (data) => {
         resetFields();
@@ -41,6 +43,11 @@
           field: 'parentId',
           componentProps: { treeData },
         });
+        updateSchema({
+          field: 'code',
+          show: !unref(isUpdate),
+        });
+        clearValidate();
       });
 
       const getTitle = computed(() => (!unref(isUpdate) ? '新增部门' : '编辑部门'));
@@ -50,6 +57,7 @@
           const values = await validate();
           setModalProps({ confirmLoading: true });
           values.deptName = values.label;
+          values.deptCode = values.code;
           values.label = undefined;
           if (unref(isUpdate)) {
             values.deptId = rowId.value;

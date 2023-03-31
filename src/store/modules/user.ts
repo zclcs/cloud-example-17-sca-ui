@@ -93,7 +93,7 @@ export const useUserStore = defineStore({
       this.roleList = roleList;
       setAuthCache(ROLES_KEY, roleList);
     },
-    setUserInfo(info: UserInfo) {
+    setUserInfo(info: UserInfo | null) {
       this.userInfo = info;
       this.lastUpdateTime = new Date().getTime();
       setAuthCache(USER_INFO_KEY, info);
@@ -134,28 +134,9 @@ export const useUserStore = defineStore({
       };
       const res = await loginApi(formParams, formData, mode);
       const { access_token, expires_in, refresh_token } = res;
-
       // save token
       this.setToken(access_token, refresh_token, expires_in);
-      // get user info
-      const userInfo = await this.getUserInfoAction();
-
-      const sessionTimeout = this.sessionTimeout;
-      if (sessionTimeout) {
-        this.setSessionTimeout(false);
-      } else if (goHome) {
-        const permissionStore = usePermissionStore();
-        if (!permissionStore.isDynamicAddedRoute) {
-          const routes = await permissionStore.buildRoutesAction();
-          routes.forEach((route) => {
-            router.addRoute(route as unknown as RouteRecordRaw);
-          });
-          router.addRoute(PAGE_NOT_FOUND_ROUTE as unknown as RouteRecordRaw);
-          permissionStore.setDynamicAddedRoute(true);
-        }
-        await router.replace(userInfo.homePath || PageEnum.BASE_HOME);
-      }
-      return userInfo;
+      return this.afterLoginAction(goHome);
     },
     async afterLoginAction(goHome?: boolean): Promise<GetUserInfoModel | null> {
       if (!this.getToken) return null;
@@ -191,14 +172,19 @@ export const useUserStore = defineStore({
      */
     async refreshTokenFn() {
       try {
-        const data = await refreshTokenApi({
-          grant_type: 'refresh_token',
-          refresh_token: this.getReFreshToken,
-        });
+        const data = await refreshTokenApi(
+          {
+            grant_type: 'refresh_token',
+          },
+          {
+            refresh_token: this.getReFreshToken,
+          },
+        );
         const { access_token, expires_in, refresh_token } = data;
         // save token
         this.setToken(access_token, refresh_token, expires_in);
-      } catch {
+      } catch (error) {
+        console.log(error);
         await this.logout(true);
       }
     },
@@ -213,6 +199,7 @@ export const useUserStore = defineStore({
       }
       this.setToken(undefined, undefined, 0);
       this.setSessionTimeout(false);
+      this.setUserInfo(null);
       goLogin && router.push(PageEnum.BASE_LOGIN);
     },
 

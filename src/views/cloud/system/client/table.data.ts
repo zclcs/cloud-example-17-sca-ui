@@ -1,5 +1,6 @@
 import { BasicColumn } from '/@/components/Table';
 import { FormSchema } from '/@/components/Table';
+import { checkClientId } from '/@/api/cloud/client';
 
 export const columns: BasicColumn[] = [
   {
@@ -46,7 +47,7 @@ export const columns: BasicColumn[] = [
   },
   {
     title: '是否自动批准',
-    dataIndex: 'autoApprove',
+    dataIndex: 'autoapprove',
     width: 80,
     align: 'left',
   },
@@ -66,7 +67,28 @@ export const formSchema: FormSchema[] = [
     field: 'clientId',
     label: '客户端ID',
     component: 'Input',
-    required: true,
+    helpMessage: ['客户端ID不能重复'],
+    dynamicRules: () => {
+      return [
+        {
+          required: true,
+          validator: (_, value) => {
+            return new Promise((resolve, reject) => {
+              if (!value) {
+                return reject('客户端ID不能为空');
+              }
+              checkClientId({ clientId: value })
+                .then(() => {
+                  return resolve();
+                })
+                .catch((error) => {
+                  return reject(error.data.msg || '验证失败');
+                });
+            });
+          },
+        },
+      ];
+    },
   },
   {
     field: 'clientSecret',
@@ -89,38 +111,32 @@ export const formSchema: FormSchema[] = [
         {
           label: 'authorization_code',
           value: 'authorization_code',
-          key: '1',
+          key: 'authorization_code',
         },
         {
           label: 'client_credentials',
           value: 'client_credentials',
-          key: '2',
+          key: 'client_credentials',
         },
         {
           label: 'password',
           value: 'password',
-          key: '3',
-        },
-        {
-          label: 'implicit',
-          value: 'implicit',
-          key: '4',
+          key: 'password',
         },
         {
           label: 'refresh_token',
           value: 'refresh_token',
-          key: '5',
+          key: 'refresh_token',
+        },
+        {
+          label: 'app',
+          value: 'app',
+          key: 'app',
         },
       ],
       mode: 'multiple',
     },
     required: true,
-  },
-  {
-    label: '',
-    field: 'menuIds',
-    slot: 'menu',
-    component: 'Input',
   },
   {
     field: 'webServerRedirectUri',
@@ -131,7 +147,6 @@ export const formSchema: FormSchema[] = [
     field: 'accessTokenValidity',
     label: '访问令牌有效期（秒）',
     component: 'Input',
-    required: true,
   },
   {
     field: 'refreshTokenValidity',
@@ -139,7 +154,7 @@ export const formSchema: FormSchema[] = [
     component: 'Input',
   },
   {
-    field: 'autoApprove',
+    field: 'autoapprove',
     label: '自动批准',
     component: 'Select',
     componentProps: {
@@ -147,14 +162,21 @@ export const formSchema: FormSchema[] = [
         {
           label: 'true',
           value: 'true',
-          key: '1',
+          key: 'true',
         },
         {
           label: 'false',
           value: 'false',
-          key: '2',
+          key: 'false',
         },
       ],
     },
+    defaultValue: 'true',
+  },
+  {
+    label: '',
+    field: 'menuIds',
+    slot: 'menu',
+    component: 'Input',
   },
 ];

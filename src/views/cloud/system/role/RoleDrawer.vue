@@ -12,7 +12,7 @@
         <BasicTree
           v-model:value="model[field]"
           :treeData="treeData"
-          :replaceFields="{ title: 'label', key: 'id' }"
+          :fieldNames="{ title: 'label', key: 'id' }"
           checkable
           :onCheck="checkMenu"
           ref="treeRef"
@@ -30,7 +30,7 @@
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
   import { BasicTree, TreeItem } from '/@/components/Tree';
 
-  import { getMenuList } from '/@/api/cloud/system';
+  import { getMenuTree } from '/@/api/cloud/system';
   import { createRoleApi, updateRoleApi } from '/@/api/cloud/role';
 
   export default defineComponent({
@@ -52,18 +52,20 @@
         return tree;
       }
 
-      const [registerForm, { resetFields, setFieldsValue, validate, clearValidate }] = useForm({
-        labelWidth: 90,
-        schemas: formSchema,
-        showActionButtonGroup: false,
-      });
+      const [registerForm, { resetFields, setFieldsValue, updateSchema, validate, clearValidate }] =
+        useForm({
+          baseColProps: { span: 24 },
+          labelWidth: 90,
+          schemas: formSchema,
+          showActionButtonGroup: false,
+        });
 
       const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(async (data) => {
         resetFields();
         setDrawerProps({ confirmLoading: false });
         // 需要在setFieldsValue之前先填充treeData，否则Tree组件可能会报key not exist警告
         if (unref(treeData).length === 0) {
-          treeData.value = (await getMenuList()) as any as TreeItem[];
+          treeData.value = (await getMenuTree()) as any as TreeItem[];
           // 展开全部
           nextTick(() => {
             getTree().expandAll(true);
@@ -77,6 +79,10 @@
             ...data.record,
           });
         }
+        updateSchema({
+          field: 'roleCode',
+          show: !unref(isUpdate),
+        });
         clearValidate();
       });
 

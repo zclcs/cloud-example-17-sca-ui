@@ -2,7 +2,7 @@ import { defHttpWithTransform } from '/@/utils/http/axios';
 import { getMenuListResultModel } from './model/menuModel';
 
 enum Api {
-  GetMenuList = '/system/menu/routers',
+  GetMenuList = '/system/user/routers',
 }
 
 /**

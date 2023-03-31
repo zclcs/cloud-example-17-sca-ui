@@ -1,40 +1,44 @@
 <template>
   <div>
-    <BasicTable @register="registerTable" @fetch-success="onFetchSuccess">
+    <BasicTable @register="registerTable">
       <template #toolbar>
         <a-button v-if="hasPermission('menu:add')" type="primary" @click="handleCreate">
           新增菜单
         </a-button>
+        <a-button type="primary" @click="expandAll">展开全部</a-button>
+        <a-button type="primary" @click="collapseAll">折叠全部</a-button>
       </template>
-      <template #action="{ record }">
-        <TableAction
-          :actions="[
-            {
-              icon: 'clarity:note-edit-line',
-              onClick: handleEdit.bind(null, record),
-              ifShow: hasPermission('menu:update'),
-            },
-            {
-              icon: 'ant-design:delete-outlined',
-              color: 'error',
-              popConfirm: {
-                title: '是否确认删除',
-                confirm: handleDelete.bind(null, record),
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.key === 'action'">
+          <TableAction
+            :actions="[
+              {
+                icon: 'clarity:note-edit-line',
+                onClick: handleEdit.bind(null, record),
+                ifShow: hasPermission('menu:update'),
               },
-              ifShow: hasPermission('menu:delete'),
-            },
-          ]"
-        />
+              {
+                icon: 'ant-design:delete-outlined',
+                color: 'error',
+                popConfirm: {
+                  title: '是否确认删除',
+                  confirm: handleDelete.bind(null, record),
+                },
+                ifShow: hasPermission('menu:delete'),
+              },
+            ]"
+          />
+        </template>
       </template>
     </BasicTable>
     <MenuDrawer @register="registerDrawer" @success="handleSuccess" />
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, nextTick } from 'vue';
+  import { defineComponent } from 'vue';
 
   import { BasicTable, useTable, TableAction } from '/@/components/Table';
-  import { getMenuList } from '/@/api/cloud/system';
+  import { getMenuTree } from '/@/api/cloud/system';
   import { deleteMenuApi } from '/@/api/cloud/menu';
 
   import { useDrawer } from '/@/components/Drawer';
@@ -49,9 +53,9 @@
     setup() {
       const [registerDrawer, { openDrawer }] = useDrawer();
       const { hasPermission } = usePermission();
-      const [registerTable, { reload, expandAll }] = useTable({
+      const [registerTable, { reload, expandAll, collapseAll }] = useTable({
         title: '菜单列表',
-        api: getMenuList,
+        api: getMenuTree,
         rowKey: 'id',
         columns,
         formConfig: {
@@ -71,7 +75,6 @@
           width: 80,
           title: '操作',
           dataIndex: 'action',
-          slots: { customRender: 'action' },
           fixed: undefined,
           ifShow: hasPermission('menu:update') || hasPermission('menu:delete'),
         },
@@ -99,11 +102,6 @@
         reload();
       }
 
-      function onFetchSuccess() {
-        // 演示默认展开所有表项
-        nextTick(expandAll);
-      }
-
       return {
         registerTable,
         registerDrawer,
@@ -111,8 +109,9 @@
         handleEdit,
         handleDelete,
         handleSuccess,
-        onFetchSuccess,
         hasPermission,
+        expandAll,
+        collapseAll,
       };
     },
   });

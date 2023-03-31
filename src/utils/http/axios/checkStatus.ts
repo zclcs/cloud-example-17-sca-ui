@@ -27,15 +27,33 @@ export function checkStatus(
     // 401: Not logged in
     // Jump to the login page if not logged in, and carry the path of the current page
     // Return to the current page after successful login. This step needs to be operated on the login page.
-    case 401:
+    // case 401:
+    //   userStore.setToken(undefined, undefined, 0);
+    //   errMessage = msg || t('sys.api.errMsg401');
+    //   if (stp === SessionTimeoutProcessingEnum.PAGE_COVERAGE) {
+    //     userStore.setSessionTimeout(true);
+    //   } else {
+    //     userStore.logout(true);
+    //   }
+    //   break;
+    case 424:
       userStore.setToken(undefined, undefined, 0);
-      errMessage = msg || t('sys.api.errMsg401');
+      errMessage = msg || t('sys.api.errMsg428');
       if (stp === SessionTimeoutProcessingEnum.PAGE_COVERAGE) {
         userStore.setSessionTimeout(true);
       } else {
         userStore.logout(true);
       }
       break;
+    // case 428:
+    //   userStore.setToken(undefined, undefined, 0);
+    //   errMessage = msg || t('sys.api.errMsg428');
+    //   if (stp === SessionTimeoutProcessingEnum.PAGE_COVERAGE) {
+    //     userStore.setSessionTimeout(true);
+    //   } else {
+    //     userStore.logout(true);
+    //   }
+    //   break;
     case 403:
       errMessage = t('sys.api.errMsg403');
       break;

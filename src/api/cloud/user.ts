@@ -6,12 +6,12 @@ enum Api {
   ACCOUNT_INFO = '/account/getAccountInfo',
   SESSION_TIMEOUT = '/user/sessionTimeout',
   USER = '/system/user',
-  RESETPASSWORD = '/system/user/password/reset',
-  CHECKPASSWORD = '/system/user/password',
-  CHECKMINEPASSWORD = '/system/user/password/mine/check',
-  PASSWORD = '/system/user/password',
-  PASSWORDMINE = '/system/user/password/mine',
-  STATUS = '/system/user/status',
+  CHECK_MINE_PASSWORD = '/system/user/checkMinePassword/',
+  CHECK_PASSWORD = '/system/user/checkPassword/',
+  UPDATE_MINE_PASSWORD = '/system/user/updateMinePassword/',
+  UPDATE_PASSWORD = '/system/user/updatePassword/',
+  UPDATE_USER_STATUS = '/system/user/updateUserStatus/',
+  RESET_PASSWORD = '/system/user/resetPassword/',
 }
 
 // Get personal center-basic settings
@@ -42,16 +42,13 @@ export const updateUserApi = (params: UserInfoModel) =>
 
 export const resetUserPasswordApi = (username: String) =>
   defHttpWithTransform.put<void>({
-    url: Api.RESETPASSWORD,
-    params: {
-      usernames: username,
-    },
+    url: Api.RESET_PASSWORD + username,
   });
 
 export const checkUserPasswordApi = (username: String, password: String) =>
   defHttpWithTransform.get(
     {
-      url: Api.CHECKPASSWORD + '/' + username + '/check' + '/' + password,
+      url: Api.CHECK_PASSWORD + username + '/' + password,
     },
     { errorMessageMode: 'none' },
   );
@@ -59,14 +56,14 @@ export const checkUserPasswordApi = (username: String, password: String) =>
 export const checkMinePasswordApi = (password: String) =>
   defHttpWithTransform.get(
     {
-      url: Api.CHECKMINEPASSWORD + '/' + password,
+      url: Api.CHECK_MINE_PASSWORD + password,
     },
     { errorMessageMode: 'none' },
   );
 
 export const userPasswordApi = (username: String, password: String) =>
   defHttpWithTransform.put<void>({
-    url: Api.PASSWORD,
+    url: Api.UPDATE_PASSWORD + username + '/' + password,
     params: {
       username,
       password,
@@ -74,19 +71,16 @@ export const userPasswordApi = (username: String, password: String) =>
   });
 
 export const minePasswordApi = (password: String) =>
-  defHttpWithTransform.put<void>({
-    url: Api.PASSWORDMINE,
-    params: {
-      password,
+  defHttpWithTransform.put<void>(
+    {
+      url: Api.UPDATE_MINE_PASSWORD + password,
     },
-  });
+    { errorMessageMode: 'none' },
+  );
 
 export const userStatusApi = (username: String) =>
   defHttpWithTransform.put<void>({
-    url: Api.STATUS,
-    params: {
-      username,
-    },
+    url: Api.UPDATE_USER_STATUS + username,
   });
 
 export const deleteUserApi = (userIds: String) =>

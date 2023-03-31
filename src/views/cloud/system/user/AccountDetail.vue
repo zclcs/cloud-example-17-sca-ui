@@ -6,8 +6,21 @@
     @back="goBack"
   >
     <template #extra>
-      <a-button type="primary" danger @click="handleUpdateUserStatus"> 禁用账号 </a-button>
-      <a-button type="primary" @click="handleUpdatePassword"> 修改密码 </a-button>
+      <a-button
+        v-if="hasPermission('user:updateStatus')"
+        type="primary"
+        danger
+        @click="handleUpdateUserStatus"
+      >
+        禁用账号
+      </a-button>
+      <a-button
+        v-if="hasPermission('user:updatePassword')"
+        type="primary"
+        @click="handleUpdatePassword"
+      >
+        修改密码
+      </a-button>
     </template>
     <template #footer>
       <a-tabs default-active-key="detail" v-model:activeKey="currentKey">
@@ -73,14 +86,14 @@
         showTableSetting: true,
         bordered: true,
         beforeFetch(info) {
+          info.createAt = undefined;
           info.username = username.value;
         },
         handleSearchInfoFn(info) {
-          if (info.createTime) {
-            const createTime = info.createTime;
-            info.createTime = undefined;
-            info.createTimeFrom = createTime[0];
-            info.createTimeTo = createTime[1];
+          if (info.createAt) {
+            const createAt = info.createAt;
+            info.createAtFrom = createAt[0];
+            info.createAtTo = createAt[1];
           }
           return info;
         },

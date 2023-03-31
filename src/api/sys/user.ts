@@ -1,5 +1,5 @@
 import { defHttp, defNoTokenHttp, defHttpWithTransform } from '/@/utils/http/axios';
-import { LoginResultModel, GetUserInfoModel, RefreshTokenParams } from './model/userModel';
+import { LoginResultModel, GetUserInfoModel } from './model/userModel';
 
 import { ErrorMessageMode } from '/#/axios';
 import { ContentTypeEnum } from '/@/enums/httpEnum';
@@ -7,8 +7,8 @@ import { ContentTypeEnum } from '/@/enums/httpEnum';
 enum Api {
   Login = '/auth/oauth2/token',
   Logout = '/auth/token/logout',
-  GetUserInfo = '/system/user/info',
-  GetPermCode = '/system/menu/permissions',
+  GetUserInfo = '/system/user/findUserInfo',
+  GetPermCode = '/system/user/permissions',
 }
 
 /**
@@ -46,7 +46,7 @@ export function getPermCode() {
   return defHttpWithTransform.get<string[]>({ url: Api.GetPermCode });
 }
 
-export function refreshTokenApi(params: RefreshTokenParams) {
+export function refreshTokenApi(params: any, data: any) {
   return defNoTokenHttp.post<LoginResultModel>({
     url: Api.Login,
     headers: {
@@ -54,6 +54,7 @@ export function refreshTokenApi(params: RefreshTokenParams) {
       'Content-Type': ContentTypeEnum.FORM_URLENCODED,
     },
     params,
+    data,
   });
 }
 

@@ -18,14 +18,16 @@ import { defHttpWithTransform } from '/@/utils/http/axios';
 enum Api {
   UserPage = '/system/user',
   UserLogPage = '/system/log',
-  IsUserExist = '/system/user/check/',
-  IsRoleExist = '/system/role/check/',
-  DeptTree = '/system/dept/options',
-  DeptList = '/system/dept/list',
+  checkUsername = '/system/user/checkUsername',
+  checkUserMobile = '/system/user/checkUserMobile',
+  checkRoleName = '/system/role/checkRoleName',
+  checkRoleCode = '/system/role/checkRoleCode',
+  DeptTree = '/system/dept/tree',
+  DeptOptions = '/system/dept/options',
   setRoleStatus = '/system/setRoleStatus',
-  MenuList = '/system/menu',
+  MenuTree = '/system/menu/tree',
   RolePageList = '/system/role',
-  GetAllRoleList = '/system/role/options',
+  RoleOptions = '/system/role/options',
 }
 
 export const getUserPage = (params: UserParams) =>
@@ -37,29 +39,45 @@ export const getUserLogPage = (params: UserLogParams) =>
 export const getDeptTree = (params?: DeptTreeItem) =>
   defHttpWithTransform.get<DeptTreeGetResultModel>({ url: Api.DeptTree, params });
 
-export const getDeptList = (params?: DeptListItem) =>
-  defHttpWithTransform.get<DeptListItem>({ url: Api.DeptList, params });
+export const getDeptOptions = (params?: DeptListItem) =>
+  defHttpWithTransform.get<DeptListItem>({ url: Api.DeptOptions, params });
 
-export const getMenuList = (params?: MenuParams) =>
-  defHttpWithTransform.get<MenuListGetResultModel>({ url: Api.MenuList, params });
+export const getMenuTree = (params?: MenuParams) =>
+  defHttpWithTransform.get<MenuListGetResultModel>({ url: Api.MenuTree, params });
 
 export const getRoleListByPage = (params?: RolePageParams) =>
   defHttpWithTransform.get<RolePageListGetResultModel>({ url: Api.RolePageList, params });
 
-export const getAllRoleList = (params?: RoleParams) =>
-  defHttpWithTransform.get<RoleListGetResultModel>({ url: Api.GetAllRoleList, params });
+export const getRoleOptions = (params?: RoleParams) =>
+  defHttpWithTransform.get<RoleListGetResultModel>({ url: Api.RoleOptions, params });
 
 export const setRoleStatus = (id: number, status: string) =>
   defHttpWithTransform.post({ url: Api.setRoleStatus, params: { id, status } });
 
-export const isUserExist = (userId: number, account: string) =>
+export const checkUsername = (params: any) =>
+  defHttpWithTransform.get({ url: Api.checkUsername, params }, { errorMessageMode: 'none' });
+
+export const checkUserMobile = (params: any) =>
+  defHttpWithTransform.get({ url: Api.checkUserMobile, params }, { errorMessageMode: 'none' });
+
+export const checkRoleName = (params: any) =>
+  defHttpWithTransform.get({ url: Api.checkRoleName, params }, { errorMessageMode: 'none' });
+
+export const checkRoleCode = (params: any) =>
+  defHttpWithTransform.get({ url: Api.checkRoleCode, params }, { errorMessageMode: 'none' });
+
+export const checkMenuCode = (params: any) =>
   defHttpWithTransform.get(
-    { url: Api.IsUserExist + userId + '/' + account },
+    { url: '/system/menu/checkMenuCode', params },
     { errorMessageMode: 'none' },
   );
-
-export const isRoleExist = (roleId: number, roleName: string) =>
+export const checkDeptName = (params: any) =>
   defHttpWithTransform.get(
-    { url: Api.IsRoleExist + roleId + '/' + roleName },
+    { url: '/system/menu/checkDeptName', params },
+    { errorMessageMode: 'none' },
+  );
+export const checkDeptCode = (params: any) =>
+  defHttpWithTransform.get(
+    { url: '/system/dept/checkDeptCode', params },
     { errorMessageMode: 'none' },
   );

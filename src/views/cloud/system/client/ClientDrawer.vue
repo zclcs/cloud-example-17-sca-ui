@@ -12,7 +12,7 @@
         <BasicTree
           v-model:value="model[field]"
           :treeData="treeData"
-          :replaceFields="{ title: 'label', key: 'id' }"
+          :fieldNames="{ title: 'label', key: 'id' }"
           checkable
           :onCheck="checkMenu"
           ref="menuTreeRef"
@@ -29,7 +29,7 @@
   import { BasicForm, useForm } from '/@/components/Form/index';
   import { BasicTree, TreeItem } from '/@/components/Tree';
   import { formSchema } from './table.data';
-  import { getMenuList } from '/@/api/cloud/system';
+  import { getMenuTree } from '/@/api/cloud/system';
 
   import { createClientApi, updateClientApi } from '/@/api/cloud/client';
   export default defineComponent({
@@ -53,6 +53,7 @@
 
       const [registerForm, { resetFields, setFieldsValue, updateSchema, validate, clearValidate }] =
         useForm({
+          baseColProps: { span: 24 },
           labelWidth: 150,
           schemas: formSchema,
           showActionButtonGroup: false,
@@ -63,21 +64,13 @@
         setDrawerProps({ confirmLoading: false });
         // 需要在setFieldsValue之前先填充treeData，否则Tree组件可能会报key not exist警告
         if (unref(treeData).length === 0) {
-          treeData.value = (await getMenuList()) as any as TreeItem[];
+          treeData.value = (await getMenuTree()) as any as TreeItem[];
           // 展开全部
           nextTick(() => {
             getTree().expandAll(true);
           });
         }
         isUpdate.value = !!data?.isUpdate;
-        updateSchema({
-          field: 'clientId',
-          ifShow: true,
-        });
-        updateSchema({
-          field: 'clientSecret',
-          ifShow: true,
-        });
         if (unref(isUpdate)) {
           rowId.value = data.record.clientId;
           if (data.record.menuIds) {
@@ -88,19 +81,20 @@
             typeof authorizedGrantTypes === 'string'
               ? authorizedGrantTypes.split(',')
               : authorizedGrantTypes;
-          data.record.authorizedGrantTypes = arr;
           setFieldsValue({
             ...data.record,
-          });
-          updateSchema({
-            field: 'clientId',
-            ifShow: false,
-          });
-          updateSchema({
-            field: 'clientSecret',
-            ifShow: false,
+            authorizedGrantTypes: arr,
+            clientId: undefined,
           });
         }
+        updateSchema({
+          field: 'clientId',
+          show: !unref(isUpdate),
+        });
+        updateSchema({
+          field: 'clientSecret',
+          show: !unref(isUpdate),
+        });
         clearValidate();
       });
 

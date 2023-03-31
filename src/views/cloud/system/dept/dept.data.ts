@@ -1,11 +1,17 @@
 import { BasicColumn } from '/@/components/Table';
 import { FormSchema } from '/@/components/Table';
-import { getDeptTree } from '/@/api/cloud/system';
+import { getDeptTree, checkDeptName, checkDeptCode } from '/@/api/cloud/system';
 
 export const columns: BasicColumn[] = [
   {
     title: '部门名称',
     dataIndex: 'label',
+    width: 160,
+    align: 'left',
+  },
+  {
+    title: '部门编码',
+    dataIndex: 'code',
     width: 160,
     align: 'left',
   },
@@ -56,10 +62,67 @@ export const searchFormSchema: FormSchema[] = [
 
 export const formSchema: FormSchema[] = [
   {
+    field: 'id',
+    label: '部门编号',
+    component: 'Input',
+    required: true,
+    ifShow: false,
+  },
+  {
     field: 'label',
     label: '部门名称',
     component: 'Input',
-    required: true,
+    helpMessage: ['部门名称不能重复'],
+    dynamicRules: ({ values }) => {
+      return [
+        {
+          required: true,
+          validator: (_, value) => {
+            return new Promise((resolve, reject) => {
+              const { id } = values;
+              if (!value) {
+                return reject('部门名称不能为空');
+              }
+              checkDeptName({ deptId: id, deptName: value })
+                .then(() => {
+                  return resolve();
+                })
+                .catch((error) => {
+                  return reject(error.data.msg || '验证失败');
+                });
+            });
+          },
+        },
+      ];
+    },
+  },
+  {
+    field: 'code',
+    label: '部门编码',
+    component: 'Input',
+    helpMessage: ['部门编码不能重复'],
+    dynamicRules: ({ values }) => {
+      return [
+        {
+          required: true,
+          validator: (_, value) => {
+            return new Promise((resolve, reject) => {
+              const { id } = values;
+              if (!value) {
+                return reject('部门编码不能为空');
+              }
+              checkDeptCode({ deptId: id, deptCode: value })
+                .then(() => {
+                  return resolve();
+                })
+                .catch((error) => {
+                  return reject(error.data.msg || '验证失败');
+                });
+            });
+          },
+        },
+      ];
+    },
   },
   {
     field: 'harPar',
@@ -82,15 +145,15 @@ export const formSchema: FormSchema[] = [
     required: true,
   },
   {
-    field: 'parentId',
+    field: 'parentCode',
     label: '上级部门',
     component: 'ApiTreeSelect',
     componentProps: {
       api: getDeptTree,
-      replaceFields: {
+      fieldNames: {
         title: 'label',
-        key: 'id',
-        value: 'id',
+        key: 'code',
+        value: 'code',
       },
       getPopupContainer: () => document.body,
     },

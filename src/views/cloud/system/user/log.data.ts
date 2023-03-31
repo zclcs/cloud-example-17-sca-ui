@@ -32,7 +32,7 @@ export const columns: BasicColumn[] = [
   },
   {
     title: '创建时间',
-    dataIndex: 'createTime',
+    dataIndex: 'createAt',
   },
   {
     title: '操作地点',
@@ -42,10 +42,14 @@ export const columns: BasicColumn[] = [
 
 export const searchFormSchema: FormSchema[] = [
   {
-    field: 'createTime',
-    label: '创建时间',
+    field: 'createAt',
+    label: '创建时间起',
     component: 'RangePicker',
-    colProps: { span: 8 },
+    componentProps: {
+      style: { width: '100%' },
+      valueFormat: 'YYYY-MM-DD',
+    },
+    colProps: { span: 6 },
   },
   {
     field: 'operation',

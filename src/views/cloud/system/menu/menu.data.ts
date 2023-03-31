@@ -2,13 +2,19 @@ import { BasicColumn } from '/@/components/Table';
 import { FormSchema } from '/@/components/Table';
 import { h } from 'vue';
 import { Icon } from '/@/components/Icon';
-import { getMenuList } from '/@/api/cloud/system';
+import { getMenuTree, checkMenuCode } from '/@/api/cloud/system';
 import { getDict } from '/@/api/cloud/dictCache';
 
 export const columns: BasicColumn[] = [
   {
     title: '菜单名称',
     dataIndex: 'label',
+    width: 200,
+    align: 'left',
+  },
+  {
+    title: '菜单编码',
+    dataIndex: 'code',
     width: 200,
     align: 'left',
   },
@@ -35,6 +41,10 @@ export const columns: BasicColumn[] = [
     dataIndex: 'component',
   },
   {
+    title: '路由地址',
+    dataIndex: 'path',
+  },
+  {
     title: '排序',
     dataIndex: 'orderNum',
     width: 50,
@@ -46,7 +56,6 @@ export const columns: BasicColumn[] = [
   },
 ];
 
-const text = (type: string) => (type === '2' ? '目录' : type === '0' ? '菜单' : '按钮');
 const isMenu = (type: string) => type === '0';
 const isButton = (type: string) => type === '1';
 const isDir = (type: string) => type === '2';
@@ -74,27 +83,55 @@ export const searchFormSchema: FormSchema[] = [
 
 export const formSchema: FormSchema[] = [
   {
+    field: 'id',
+    label: '菜单编号',
+    component: 'Input',
+    required: true,
+    ifShow: false,
+  },
+  {
     field: 'type',
     label: '菜单类型',
     component: 'ApiSelect',
     defaultValue: '0',
-    componentProps: ({ formActionType }) => {
-      return {
-        api: getDict,
-        params: { dict: 'menu_type' },
-        resultField: 'children',
-        labelField: 'title',
-        valueField: 'value',
-        onChange: async (s: string) => {
-          const { updateSchema } = formActionType;
-          updateSchema({
-            field: 'label',
-            label: text(s) + '名称',
-          });
-        },
-      };
+    componentProps: {
+      api: getDict,
+      params: { dictName: 'system_menu.type' },
+      labelField: 'title',
+      valueField: 'value',
+      immediate: true,
+      alwaysLoad: true,
     },
     colProps: { lg: 24, md: 24 },
+  },
+  {
+    field: 'code',
+    label: '菜单编码',
+    component: 'Input',
+    helpMessage: ['菜单编码不能重复'],
+    dynamicRules: ({ values }) => {
+      return [
+        {
+          required: true,
+          validator: (_, value) => {
+            return new Promise((resolve, reject) => {
+              console.log(values);
+              const { id } = values;
+              if (!value) {
+                return reject('菜单编码不能为空');
+              }
+              checkMenuCode({ menuId: id, menuCode: value })
+                .then(() => {
+                  return resolve();
+                })
+                .catch((error) => {
+                  return reject(error.data.msg || '验证失败');
+                });
+            });
+          },
+        },
+      ];
+    },
   },
   {
     field: 'label',
@@ -109,16 +146,18 @@ export const formSchema: FormSchema[] = [
     ifShow: ({ values }) => isMenu(values.type),
   },
   {
-    field: 'parentId',
+    field: 'parentCode',
     label: '上级菜单',
     component: 'ApiTreeSelect',
     componentProps: {
-      api: getMenuList,
-      replaceFields: {
+      api: getMenuTree,
+      fieldNames: {
         title: 'label',
-        key: 'id',
-        value: 'id',
+        key: 'code',
+        value: 'code',
       },
+      immediate: true,
+      alwaysLoad: true,
       getPopupContainer: () => document.body,
     },
     ifShow: ({ values }) => !isDir(values.type),
@@ -189,32 +228,34 @@ export const formSchema: FormSchema[] = [
   //   ifShow: ({ values }) => !isButton(values.type),
   // },
   {
-    field: 'ignoreKeepAlive',
-    label: '是否忽略缓存',
-    defaultValue: '0',
-    component: 'ApiSelect',
-    componentProps: {
-      api: getDict,
-      params: { dict: 'yes_no' },
-      resultField: 'children',
-      labelField: 'title',
-      valueField: 'value',
-    },
-    ifShow: ({ values }) => isMenu(values.type),
-  },
-  {
     field: 'hideMenu',
     label: '是否隐藏菜单',
     defaultValue: '0',
     component: 'ApiSelect',
     componentProps: {
       api: getDict,
-      params: { dict: 'yes_no' },
-      resultField: 'children',
+      params: { dictName: 'yes_no' },
       labelField: 'title',
       valueField: 'value',
+      immediate: true,
+      alwaysLoad: true,
     },
     ifShow: ({ values }) => !isButton(values.type),
+  },
+  {
+    field: 'ignoreKeepAlive',
+    label: '是否忽略缓存',
+    defaultValue: '0',
+    component: 'ApiSelect',
+    componentProps: {
+      api: getDict,
+      params: { dictName: 'yes_no' },
+      labelField: 'title',
+      valueField: 'value',
+      immediate: true,
+      alwaysLoad: true,
+    },
+    ifShow: ({ values }) => isMenu(values.type),
   },
   {
     field: 'hideBreadcrumb',
@@ -223,10 +264,11 @@ export const formSchema: FormSchema[] = [
     component: 'ApiSelect',
     componentProps: {
       api: getDict,
-      params: { dict: 'yes_no' },
-      resultField: 'children',
+      params: { dictName: 'yes_no' },
       labelField: 'title',
       valueField: 'value',
+      immediate: true,
+      alwaysLoad: true,
     },
     ifShow: ({ values }) => !isButton(values.type),
   },
@@ -237,10 +279,11 @@ export const formSchema: FormSchema[] = [
     component: 'ApiSelect',
     componentProps: {
       api: getDict,
-      params: { dict: 'yes_no' },
-      resultField: 'children',
+      params: { dictName: 'yes_no' },
       labelField: 'title',
       valueField: 'value',
+      immediate: true,
+      alwaysLoad: true,
     },
     ifShow: ({ values }) => !isButton(values.type),
   },

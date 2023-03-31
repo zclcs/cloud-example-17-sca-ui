@@ -16,7 +16,7 @@
   import { formSchema } from './menu.data';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
 
-  import { getMenuList } from '/@/api/cloud/system';
+  import { getMenuTree } from '/@/api/cloud/system';
   import { createMenuApi, updateMenuApi } from '/@/api/cloud/menu';
 
   export default defineComponent({
@@ -27,12 +27,13 @@
       const isUpdate = ref(true);
       const rowId = ref('');
 
-      const [registerForm, { resetFields, setFieldsValue, updateSchema, validate }] = useForm({
-        labelWidth: 100,
-        schemas: formSchema,
-        showActionButtonGroup: false,
-        baseColProps: { lg: 12, md: 24 },
-      });
+      const [registerForm, { resetFields, setFieldsValue, updateSchema, validate, clearValidate }] =
+        useForm({
+          baseColProps: { lg: 12, md: 24 },
+          labelWidth: 150,
+          schemas: formSchema,
+          showActionButtonGroup: false,
+        });
 
       const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(async (data) => {
         resetFields();
@@ -44,18 +45,17 @@
           setFieldsValue({
             ...data.record,
           });
-          const { type } = data.record;
-          const lableName = type === '2' ? '目录' : type === '0' ? '菜单' : '按钮';
-          updateSchema({
-            field: 'label',
-            label: lableName + '名称',
-          });
         }
-        const treeData = await getMenuList();
+        const treeData = await getMenuTree();
         updateSchema({
           field: 'parentId',
           componentProps: { treeData },
         });
+        updateSchema({
+          field: 'code',
+          show: !unref(isUpdate),
+        });
+        clearValidate();
       });
 
       const getTitle = computed(() => (!unref(isUpdate) ? '新增菜单' : '编辑菜单'));
@@ -66,6 +66,8 @@
           setDrawerProps({ confirmLoading: true });
           values.menuName = values.label;
           values.label = undefined;
+          values.menuCode = values.code;
+          values.code = undefined;
           if (unref(isUpdate)) {
             values.menuId = rowId.value;
             await updateMenuApi(values);

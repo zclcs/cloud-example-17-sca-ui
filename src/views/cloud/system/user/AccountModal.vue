@@ -22,6 +22,7 @@
       const [registerForm, { setFieldsValue, updateSchema, resetFields, validate, clearValidate }] =
         useForm({
           labelWidth: 100,
+          baseColProps: { span: 24 },
           schemas: accountFormSchema,
           showActionButtonGroup: false,
           actionColOptions: {
@@ -45,7 +46,7 @@
         const treeData = await getDeptTree();
         updateSchema([
           {
-            field: 'pwd',
+            field: 'password',
             show: !unref(isUpdate),
           },
           {

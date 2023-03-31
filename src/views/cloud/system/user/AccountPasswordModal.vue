@@ -13,12 +13,13 @@
   export default defineComponent({
     name: 'AccountPasswordModal',
     components: { BasicModal, BasicForm },
-    emits: ['success'],
+    emits: ['success', 'register'],
     setup(_, { emit }) {
       const usernameRef = ref('');
 
       const [registerForm, { setFieldsValue, resetFields, validate }] = useForm({
         labelWidth: 100,
+        baseColProps: { span: 24 },
         schemas: accountPasswordFormSchema,
         showActionButtonGroup: false,
         actionColOptions: {
