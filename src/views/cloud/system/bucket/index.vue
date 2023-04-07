@@ -2,8 +2,8 @@
   <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button v-if="hasPermission('role:add')" type="primary" @click="handleCreate">
-          新增角色
+        <a-button v-if="hasPermission('bucket:add')" type="primary" @click="handleCreate">
+          新增桶
         </a-button>
       </template>
       <template #bodyCell="{ column, record }">
@@ -13,7 +13,7 @@
               {
                 icon: 'clarity:note-edit-line',
                 onClick: handleEdit.bind(null, record),
-                ifShow: hasPermission('role:update'),
+                ifShow: hasPermission('bucket:update'),
               },
               {
                 icon: 'ant-design:delete-outlined',
@@ -22,74 +22,74 @@
                   title: '是否确认删除',
                   confirm: handleDelete.bind(null, record),
                 },
-                ifShow: hasPermission('role:delete'),
+                ifShow: hasPermission('bucket:delete'),
               },
             ]"
           />
         </template>
       </template>
     </BasicTable>
-    <RoleDrawer @register="registerDrawer" @success="handleSuccess" />
+    <BucketModal @register="registerModal" @success="handleSuccess" />
   </div>
 </template>
 <script lang="ts">
   import { defineComponent } from 'vue';
 
   import { BasicTable, useTable, TableAction } from '/@/components/Table';
-  import { getRoleListByPage } from '/@/api/cloud/system';
-  import { deleteRoleApi } from '/@/api/cloud/role';
+  import { getBucketPage, deleteBucketApi } from '/@/api/cloud/bucket';
 
-  import { useDrawer } from '/@/components/Drawer';
-  import RoleDrawer from './RoleDrawer.vue';
+  import { useModal } from '/@/components/Modal';
+  import BucketModal from './BucketModal.vue';
 
-  import { columns, searchFormSchema } from './role.data';
+  import { columns, searchFormSchema } from './bucket.data';
   import { usePermission } from '/@/hooks/web/usePermission';
 
   export default defineComponent({
-    name: 'RoleManagement',
-    components: { BasicTable, RoleDrawer, TableAction },
+    name: 'Bucket',
+    components: { BasicTable, BucketModal, TableAction },
     setup() {
-      const [registerDrawer, { openDrawer }] = useDrawer();
+      const [registerModal, { openModal }] = useModal();
       const { hasPermission } = usePermission();
       const [registerTable, { reload }] = useTable({
-        title: '角色列表',
-        api: getRoleListByPage,
-        rowKey: 'roleId',
+        title: '桶管理',
+        api: getBucketPage,
+        rowKey: 'id',
         columns,
         formConfig: {
-          labelWidth: 120,
+          labelWidth: 80,
           schemas: searchFormSchema,
           autoSubmitOnEnter: true,
+        },
+        handleSearchInfoFn(info) {
+          return info;
         },
         useSearchForm: true,
         showTableSetting: true,
         bordered: true,
-        showIndexColumn: false,
         actionColumn: {
           width: 80,
           title: '操作',
           dataIndex: 'action',
-          slots: { customRender: 'action' },
           fixed: undefined,
-          ifShow: hasPermission('role:update') || hasPermission('role:delete'),
+          ifShow: hasPermission('bucket:update') || hasPermission('bucket:delete'),
         },
       });
 
       function handleCreate() {
-        openDrawer(true, {
+        openModal(true, {
           isUpdate: false,
         });
       }
 
       function handleEdit(record: Recordable) {
-        openDrawer(true, {
+        openModal(true, {
           record,
           isUpdate: true,
         });
       }
 
       async function handleDelete(record: Recordable) {
-        await deleteRoleApi(record.roleId);
+        await deleteBucketApi(record.id);
         reload();
       }
 
@@ -99,7 +99,7 @@
 
       return {
         registerTable,
-        registerDrawer,
+        registerModal,
         handleCreate,
         handleEdit,
         handleDelete,

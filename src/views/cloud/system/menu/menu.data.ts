@@ -9,13 +9,13 @@ export const columns: BasicColumn[] = [
   {
     title: '菜单名称',
     dataIndex: 'label',
-    width: 200,
+    width: 250,
     align: 'left',
   },
   {
     title: '菜单编码',
     dataIndex: 'code',
-    width: 200,
+    width: 250,
     align: 'left',
   },
   {
@@ -51,7 +51,7 @@ export const columns: BasicColumn[] = [
   },
   {
     title: '创建时间',
-    dataIndex: 'createTime',
+    dataIndex: 'createAt',
     width: 180,
   },
 ];

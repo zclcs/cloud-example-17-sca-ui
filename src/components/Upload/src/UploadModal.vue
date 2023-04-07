@@ -71,7 +71,7 @@
         default: () => [],
       },
     },
-    emits: ['change', 'register', 'delete'],
+    emits: ['change', 'register', 'delete', 'close'],
     setup(props, { emit }) {
       const state = reactive<{ fileList: FileItem[] }>({
         fileList: [],
@@ -251,7 +251,7 @@
         for (const item of fileListRef.value) {
           const { status, responseData } = item;
           if (status === UploadResultStatus.SUCCESS && responseData) {
-            fileList.push(responseData.url);
+            fileList.push(responseData.data.fileName);
           }
         }
         // 存在一个上传成功的即可保存
@@ -267,6 +267,7 @@
       async function handleCloseFunc() {
         if (!isUploadingRef.value) {
           fileListRef.value = [];
+          emit('close');
           return true;
         } else {
           createMessage.warning(t('component.upload.uploadWait'));
