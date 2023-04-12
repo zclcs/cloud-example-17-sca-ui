@@ -100,7 +100,6 @@ export const formSchema: FormSchema[] = [
     componentProps: {
       api: getDict,
       params: { dictName: 'yes_no' },
-      resultField: 'children',
       labelField: 'title',
       valueField: 'value',
       immediate: true,
@@ -154,7 +153,6 @@ export const formSchema: FormSchema[] = [
     componentProps: {
       api: getDict,
       params: { dictName: 'yes_no' },
-      resultField: 'children',
       labelField: 'title',
       valueField: 'value',
       immediate: true,

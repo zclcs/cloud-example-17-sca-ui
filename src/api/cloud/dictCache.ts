@@ -1,6 +1,7 @@
-import { defHttp } from '/@/utils/http/axios';
+import { defHttpWithTransform } from '/@/utils/http/axios';
 
 export const getDictTitle = (params: any) =>
-  defHttp.get<any>({ url: '/system/dict/dictTextQuery', params });
+  defHttpWithTransform.get<any>({ url: '/system/dict/dictTextQuery', params });
 
-export const getDict = (params: any) => defHttp.get<any>({ url: '/system/dict/dictQuery', params });
+export const getDict = (params: any) =>
+  defHttpWithTransform.get<any>({ url: '/system/dict/dictQuery', params });
