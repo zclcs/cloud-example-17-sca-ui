@@ -1,7 +1,7 @@
 import { defHttpWithTransform, defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  gen = '/generator/gen',
+  gen = '/system/gen',
   datasource = '/datasource',
   tables = '/tables',
 }

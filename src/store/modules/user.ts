@@ -171,22 +171,17 @@ export const useUserStore = defineStore({
      * @description: refresh
      */
     async refreshTokenFn() {
-      try {
-        const data = await refreshTokenApi(
-          {
-            grant_type: 'refresh_token',
-          },
-          {
-            refresh_token: this.getReFreshToken,
-          },
-        );
-        const { access_token, expires_in, refresh_token } = data;
-        // save token
-        this.setToken(access_token, refresh_token, expires_in);
-      } catch (error) {
-        console.log(error);
-        await this.logout(true);
-      }
+      const data = await refreshTokenApi(
+        {
+          grant_type: 'refresh_token',
+        },
+        {
+          refresh_token: this.getReFreshToken,
+        },
+      );
+      const { access_token, expires_in, refresh_token } = data;
+      // save token
+      this.setToken(access_token, refresh_token, expires_in);
     },
     /**
      * @description: logout

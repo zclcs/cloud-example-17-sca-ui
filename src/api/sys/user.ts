@@ -51,7 +51,7 @@ export function refreshTokenApi(params: any, data: any) {
     url: Api.Login,
     headers: {
       authorization: 'Basic emNsY3M6MTIzNDU2',
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
+      'Content-Type': ContentTypeEnum.FORM_URLENCODED_NOT,
     },
     params,
     data,

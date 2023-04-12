@@ -31,7 +31,6 @@
         </template>
       </template>
     </BasicTable>
-    <fileModal @register="registerModal" @success="handleSuccess" />
   </div>
 </template>
 <script lang="ts">
@@ -44,14 +43,13 @@
   import { uploadApi } from '/@/api/sys/upload';
 
   import { useModal } from '/@/components/Modal';
-  import fileModal from './FileModal.vue';
 
   import { columns, searchFormSchema } from './file.data';
   import { usePermission } from '/@/hooks/web/usePermission';
 
   export default defineComponent({
     name: 'File',
-    components: { BasicTable, fileModal, TableAction, BasicUpload },
+    components: { BasicTable, TableAction, BasicUpload },
     setup() {
       const [registerModal, { openModal }] = useModal();
       const { hasPermission } = usePermission();

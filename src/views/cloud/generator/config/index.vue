@@ -2,8 +2,8 @@
   <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button v-if="hasPermission('role:add')" type="primary" @click="handleCreate">
-          新增角色
+        <a-button v-if="hasPermission('generatorConfig:add')" type="primary" @click="handleCreate">
+          新增代码生成配置
         </a-button>
       </template>
       <template #bodyCell="{ column, record }">
@@ -13,7 +13,12 @@
               {
                 icon: 'clarity:note-edit-line',
                 onClick: handleEdit.bind(null, record),
-                ifShow: hasPermission('role:update'),
+                ifShow: hasPermission('generatorConfig:update'),
+              },
+              {
+                icon: 'ant-design:copy-filled',
+                onClick: handleCopy.bind(null, record),
+                ifShow: hasPermission('generatorConfig:add'),
               },
               {
                 icon: 'ant-design:delete-outlined',
@@ -22,72 +27,87 @@
                   title: '是否确认删除',
                   confirm: handleDelete.bind(null, record),
                 },
-                ifShow: hasPermission('role:delete'),
+                ifShow: hasPermission('generatorConfig:delete'),
               },
             ]"
           />
         </template>
       </template>
     </BasicTable>
-    <RoleDrawer @register="registerDrawer" @success="handleSuccess" />
+    <ConfigModal @register="registerModal" @success="handleSuccess" />
   </div>
 </template>
 <script lang="ts">
   import { defineComponent } from 'vue';
 
   import { BasicTable, useTable, TableAction } from '/@/components/Table';
-  import { getRoleListByPage } from '/@/api/cloud/system';
-  import { deleteRoleApi } from '/@/api/cloud/role';
+  import { getGeneratorConfigPage, deleteGeneratorConfigApi } from '/@/api/cloud/generatorConfig';
 
-  import { useDrawer } from '/@/components/Drawer';
-  import RoleDrawer from './RoleDrawer.vue';
+  import { useModal } from '/@/components/Modal';
+  import ConfigModal from './ConfigModal.vue';
 
-  import { columns, searchFormSchema } from './role.data';
+  import { columns, searchFormSchema } from './config.data';
   import { usePermission } from '/@/hooks/web/usePermission';
 
   export default defineComponent({
-    name: 'RoleManagement',
-    components: { BasicTable, RoleDrawer, TableAction },
+    name: 'GenConfig',
+    components: { BasicTable, ConfigModal, TableAction },
     setup() {
-      const [registerDrawer, { openDrawer }] = useDrawer();
+      const [registerModal, { openModal }] = useModal();
       const { hasPermission } = usePermission();
       const [registerTable, { reload }] = useTable({
-        title: '角色列表',
-        api: getRoleListByPage,
-        rowKey: 'roleId',
+        title: '代码生成配置管理',
+        api: getGeneratorConfigPage,
+        rowKey: 'id',
         columns,
         formConfig: {
-          labelWidth: 120,
+          labelWidth: 80,
           schemas: searchFormSchema,
           autoSubmitOnEnter: true,
+        },
+        handleSearchInfoFn(info) {
+          return info;
         },
         useSearchForm: true,
         showTableSetting: true,
         bordered: true,
-        showIndexColumn: false,
         actionColumn: {
           width: 80,
           title: '操作',
           dataIndex: 'action',
-          ifShow: hasPermission('role:update') || hasPermission('role:delete'),
+          fixed: undefined,
+          ifShow:
+            hasPermission('generatorConfig:update') ||
+            hasPermission('generatorConfig:delete') ||
+            hasPermission('generatorConfig:add'),
         },
       });
 
       function handleCreate() {
-        openDrawer(true, {
+        openModal(true, {
           isUpdate: false,
+          isCopy: false,
         });
       }
 
       function handleEdit(record: Recordable) {
-        openDrawer(true, {
+        openModal(true, {
           record,
           isUpdate: true,
+          isCopy: false,
+        });
+      }
+
+      function handleCopy(record: Recordable) {
+        openModal(true, {
+          record,
+          isUpdate: false,
+          isCopy: true,
         });
       }
 
       async function handleDelete(record: Recordable) {
-        await deleteRoleApi(record.roleId);
+        await deleteGeneratorConfigApi(record.id);
         reload();
       }
 
@@ -97,9 +117,10 @@
 
       return {
         registerTable,
-        registerDrawer,
+        registerModal,
         handleCreate,
         handleEdit,
+        handleCopy,
         handleDelete,
         handleSuccess,
         hasPermission,
