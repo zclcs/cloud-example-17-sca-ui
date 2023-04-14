@@ -108,7 +108,7 @@ export const formSchema: FormSchema[] = [
     defaultValue: '0',
   },
   {
-    field: 'menuId',
+    field: 'menuCode',
     label: '上级菜单',
     component: 'ApiTreeSelect',
     componentProps: {
