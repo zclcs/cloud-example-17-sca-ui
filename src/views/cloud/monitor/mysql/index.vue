@@ -1,17 +1,11 @@
 <template>
-  <div class="sql-editor">
-    <div class="header-tools">
-      <ul class="tools-list">
-        <li class="tools-item" @click="onRunCode">
-          <i class="el-icon-video-play"></i>
-          运行
-        </li>
-        <li class="tools-item" @click="onStopRun">
-          <i class="el-icon-video-pause"></i>
-          停止
-        </li>
-      </ul>
-    </div>
+  <div class="p-4">
+    <a-button type="primary" class="ml-2" :loading="runLoading" @click="onRunCode"> 运行 </a-button>
+    <a-button type="primary" class="ml-2" :loading="stopLoading" @click="onStopRun">
+      停止
+    </a-button>
+  </div>
+  <div class="p-4">
     <Codemirror
       v-model:value="code"
       :options="cmOptions"
@@ -23,7 +17,7 @@
   <div class="p-4">
     <BasicTable
       title="返回数据"
-      titleHelpMessage="只支持查询"
+      titleHelpMessage="仅仅用作开发排查问题，不要查询过多的数据"
       :columns="columns"
       :dataSource="data"
       ref="tableRef"
@@ -51,6 +45,7 @@
   import 'codemirror/addon/hint/show-hint';
 
   export default defineComponent({
+    name: 'Mysql',
     components: {
       Codemirror,
       BasicTable,
@@ -60,7 +55,9 @@
       const tableRef = ref<Nullable<TableActionType>>(null);
       const code = ref(`select now() from dual`);
       const data = ref<Recordable[]>([]);
-      const columns = ref<BasicColumn[]>();
+      const columns = ref<BasicColumn[]>([]);
+      const runLoading = ref(false);
+      const stopLoading = ref(false);
 
       const cmOptions: EditorConfiguration = {
         mode: 'text/x-mysql',
@@ -84,35 +81,48 @@
       }
 
       async function onRunCode() {
-        const data = await select({ sql: code.value });
-        data.value = data.data;
-        columns.value = data.columns;
-        getTableAction().setColumns(data.columns);
-        getTableAction().setTableData(data.value);
+        runLoading.value = true;
+        getTableAction().setLoading(true);
+        getTableAction().setColumns([]);
+        getTableAction().setTableData([]);
+        await select({ sql: code.value })
+          .then((res) => {
+            data.value = res.data;
+            columns.value = res.columns;
+            getTableAction().setColumns(res.columns);
+            getTableAction().setTableData(res.data);
+          })
+          .catch((_error) => {
+            getTableAction().setLoading(false);
+            runLoading.value = false;
+          });
+        getTableAction().setLoading(false);
+        runLoading.value = false;
       }
 
-      function onStopRun() {}
+      function onStopRun() {
+        getTableAction().setLoading(false);
+        runLoading.value = false;
+      }
 
       return {
         tableRef,
         code,
         data,
         columns,
+        runLoading,
+        stopLoading,
         cmOptions,
         async onReady(cm: Editor) {
+          cminstance.value = cm;
           const data = await getSchema();
           cm.setOption('hintOptions', { completeSingle: false, tables: data });
-          cminstance.value = cm;
         },
-        onChange(value: string, cm: Editor) {
+        onChange(_value: string, cm: Editor) {
           cm.showHint();
-          console.log(value, cm);
         },
-        onFocus(cm: Editor, event: FocusEvent) {
-          console.log('onFocus', cm, event);
-          cm.getDoc().on('beforeChange', (instance: Doc, obj: EditorChange) => {
-            console.log('beforeChange', instance, obj);
-          });
+        onFocus(cm: Editor, _event: FocusEvent) {
+          cm.getDoc().on('beforeChange', (_instance: Doc, _obj: EditorChange) => {});
         },
         onRunCode,
         onStopRun,
