@@ -15,7 +15,7 @@
                 icon: 'clarity:info-standard-line',
                 tooltip: '查看用户详情',
                 onClick: handleView.bind(null, record),
-                ifShow: hasPermission('user:detail:view') && hasPermission('log:view'),
+                ifShow: hasPermission('user:detail:view') || hasPermission('log:view'),
               },
               {
                 icon: 'clarity:note-edit-line',
@@ -96,7 +96,8 @@
           title: '操作',
           dataIndex: 'action',
           ifShow:
-            (hasPermission('user:detail:view') && hasPermission('log:view')) ||
+            hasPermission('user:detail:view') ||
+            hasPermission('log:view') ||
             hasPermission('user:update') ||
             hasPermission('user:delete') ||
             hasPermission('user:reset'),

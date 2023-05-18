@@ -17,7 +17,7 @@ import { defHttpWithTransform } from '/@/utils/http/axios';
 
 enum Api {
   UserPage = '/system/user',
-  UserLogPage = '/system/log',
+  UserLogPage = '/system/log/page',
   checkUsername = '/system/user/checkUsername',
   checkUserMobile = '/system/user/checkUserMobile',
   checkRoleName = '/system/role/checkRoleName',

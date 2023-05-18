@@ -30,7 +30,7 @@ export const formSchema: FormSchema[] = [
   {
     label: '值',
     field: 'value',
-    slot: 'menu',
+    slot: 'value',
     component: 'Input',
   },
   {

@@ -42,7 +42,7 @@ export const columns: BasicColumn[] = [
 
 export const searchFormSchema: FormSchema[] = [
   {
-    field: 'createAt',
+    field: 'createAtDate',
     label: '创建时间起',
     component: 'RangePicker',
     componentProps: {

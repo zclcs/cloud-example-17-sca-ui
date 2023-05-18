@@ -54,6 +54,7 @@
   import AccountPasswordModal from './AccountPasswordModal.vue';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { columns, searchFormSchema } from './log.data';
+  import { usePermission } from '/@/hooks/web/usePermission';
 
   export default defineComponent({
     name: 'AccountDetail',
@@ -65,6 +66,7 @@
       AccountPasswordModal,
     },
     setup() {
+      const { hasPermission } = usePermission();
       const route = useRoute();
       const go = useGo();
       const [registerModal, { openModal }] = useModal();
@@ -86,16 +88,12 @@
         showTableSetting: true,
         bordered: true,
         beforeFetch(info) {
-          info.createAt = undefined;
-          info.username = username.value;
-        },
-        handleSearchInfoFn(info) {
-          if (info.createAt) {
-            const createAt = info.createAt;
-            info.createAtFrom = createAt[0];
-            info.createAtTo = createAt[1];
+          if (info.createAtDate) {
+            const createAtDate = info.createAtDate;
+            info.createAtFrom = createAtDate[0];
+            info.createAtTo = createAtDate[1];
           }
-          return info;
+          info.username = username.value;
         },
       });
       const { setTitle } = useTabs();
@@ -139,6 +137,7 @@
         handleSuccess,
         username,
         currentKey,
+        hasPermission,
       };
     },
   });

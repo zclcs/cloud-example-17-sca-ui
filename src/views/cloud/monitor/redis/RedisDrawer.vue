@@ -8,7 +8,7 @@
     @ok="handleSubmit"
   >
     <BasicForm @register="registerForm">
-      <template #menu="{ model, field }">
+      <template #value="{ model, field }">
         <CodeEditor v-model:value="model[field]" :mode="modeValue" :readonly="readonly" />
       </template>
     </BasicForm>

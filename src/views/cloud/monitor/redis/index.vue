@@ -6,8 +6,8 @@
           <TableAction
             :actions="[
               {
-                icon: 'clarity:info-standard-line',
-                tooltip: '查看用户详情',
+                icon: 'ant-design:eye-filled',
+                tooltip: '查看key值',
                 onClick: handleView.bind(null, record),
                 ifShow: hasPermission('redis:view'),
               },
@@ -42,7 +42,7 @@
   import { useDrawer } from '/@/components/Drawer';
 
   export default defineComponent({
-    name: 'Redis',
+    name: 'RedisConsole',
     components: { BasicTable, TableAction, PageWrapper, RedisDrawer },
     setup() {
       const [registerDrawer, { openDrawer }] = useDrawer();
@@ -65,7 +65,7 @@
           title: '操作',
           dataIndex: 'action',
           fixed: undefined,
-          ifShow: hasPermission('redis:delete'),
+          ifShow: hasPermission('redis:view') || hasPermission('redis:delete'),
         },
       });
 
