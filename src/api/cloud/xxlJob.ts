@@ -12,3 +12,9 @@ export const getJobLogPage = (params: any) =>
 
 export const getJobLogDetail = (logId: string) =>
   defHttpWithTransform.get<any>({ url: Api.XXL_JOB + '/jobLogDetail', params: { logId } });
+
+export const startJob = (id: string) =>
+  defHttpWithTransform.get<any>({ url: Api.XXL_JOB + '/jobInfo/start', params: { id } });
+
+export const stopJob = (id: string) =>
+  defHttpWithTransform.get<any>({ url: Api.XXL_JOB + '/jobInfo/stop', params: { id } });

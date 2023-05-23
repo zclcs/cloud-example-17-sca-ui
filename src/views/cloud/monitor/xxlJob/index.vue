@@ -25,6 +25,24 @@
                 onClick: handleView.bind(null, record),
                 ifShow: hasPermission('jobLog:view'),
               },
+              {
+                icon: 'ant-design:caret-right-filled',
+                color: 'error',
+                popConfirm: {
+                  title: '是否确认启动',
+                  confirm: handleStart.bind(null, record),
+                },
+                ifShow: hasPermission('jobLog:view') && record.triggerStatus === 0,
+              },
+              {
+                icon: 'ant-design:poweroff-outlined',
+                color: 'error',
+                popConfirm: {
+                  title: '是否确认停止',
+                  confirm: handleStop.bind(null, record),
+                },
+                ifShow: hasPermission('jobLog:view') && record.triggerStatus === 1,
+              },
             ]"
           />
         </template>
@@ -36,7 +54,7 @@
   import { defineComponent } from 'vue';
 
   import { BasicTable, useTable, TableAction } from '/@/components/Table';
-  import { getJobInfoPage } from '/@/api/cloud/xxlJob';
+  import { getJobInfoPage, startJob, stopJob } from '/@/api/cloud/xxlJob';
 
   import { PageWrapper } from '/@/components/Page';
 
@@ -51,7 +69,7 @@
     setup() {
       const go = useGo();
       const { hasPermission } = usePermission();
-      const [registerTable] = useTable({
+      const [registerTable, { reload }] = useTable({
         title: 'xxlJob任务管理',
         api: getJobInfoPage,
         rowKey: 'id',
@@ -85,10 +103,22 @@
         );
       }
 
+      async function handleStart(record: Recordable) {
+        await startJob(record.id);
+        reload();
+      }
+
+      async function handleStop(record: Recordable) {
+        await stopJob(record.id);
+        reload();
+      }
+
       return {
         registerTable,
         hasPermission,
         handleView,
+        handleStart,
+        handleStop,
       };
     },
   });
