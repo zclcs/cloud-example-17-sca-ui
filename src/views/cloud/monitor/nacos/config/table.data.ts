@@ -30,3 +30,12 @@ export const searchFormSchema: FormSchema[] = [
     colProps: { span: 6 },
   },
 ];
+
+export const formSchema: FormSchema[] = [
+  {
+    label: '值',
+    field: 'content',
+    slot: 'content',
+    component: 'Input',
+  },
+];
