@@ -11,7 +11,7 @@
           @close="handleClose"
           :api="uploadApi"
         />
-        <a-button type="primary" @click="handleCreate"> 新增文件 </a-button>
+        <!-- <a-button type="primary" @click="handleCreate"> 新增文件 </a-button> -->
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'action'">

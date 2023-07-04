@@ -53,6 +53,12 @@ export const columns: BasicColumn[] = [
 
 export const searchFormSchema: FormSchema[] = [
   {
+    field: 'dictName',
+    label: '字典唯一值',
+    component: 'Input',
+    colProps: { span: 6 },
+  },
+  {
     field: 'value',
     label: '字典项唯一值',
     component: 'Input',

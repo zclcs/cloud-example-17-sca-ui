@@ -13,6 +13,11 @@ export const columns: BasicColumn[] = [
     width: 120,
   },
   {
+    title: '内容类型',
+    dataIndex: 'contentType',
+    width: 80,
+  },
+  {
     title: '桶名称',
     dataIndex: 'bucketName',
     width: 120,

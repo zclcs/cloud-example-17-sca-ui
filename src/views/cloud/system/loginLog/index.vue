@@ -12,7 +12,7 @@
                   title: '是否确认删除',
                   confirm: handleDelete.bind(null, record),
                 },
-                ifShow: hasPermission('routeLog:delete'),
+                ifShow: hasPermission('loginLog:delete'),
               },
             ]"
           />
@@ -25,7 +25,7 @@
   import { defineComponent } from 'vue';
 
   import { BasicTable, useTable, TableAction } from '/@/components/Table';
-  import { getRouteLogPage, deleteRouteLogApi } from '/@/api/cloud/routeLog';
+  import { getLoginLogPage, deleteLoginLogApi } from '/@/api/cloud/loginLog';
 
   import { PageWrapper } from '/@/components/Page';
 
@@ -33,14 +33,14 @@
   import { usePermission } from '/@/hooks/web/usePermission';
 
   export default defineComponent({
-    name: 'RouteLog',
+    name: 'LoginLog',
     components: { BasicTable, TableAction, PageWrapper },
     setup() {
       const { hasPermission } = usePermission();
       const [registerTable, { reload }] = useTable({
-        title: '网关日志',
-        api: getRouteLogPage,
-        rowKey: 'routeId',
+        title: '系统登录日志',
+        api: getLoginLogPage,
+        rowKey: 'id',
         columns,
         formConfig: {
           labelWidth: 80,
@@ -48,11 +48,11 @@
           autoSubmitOnEnter: true,
         },
         beforeFetch(info) {
-          if (info.requestTime) {
-            const requestTime = info.requestTime;
-            info.requestTime = undefined;
-            info.requestTimeFrom = requestTime[0];
-            info.requestTimeTo = requestTime[1];
+          if (info.loginTime) {
+            const loginTime = info.loginTime;
+            info.loginTime = undefined;
+            info.loginTimeFrom = loginTime[0];
+            info.loginTimeTo = loginTime[1];
           }
           return info;
         },
@@ -69,7 +69,7 @@
       });
 
       async function handleDelete(record: Recordable) {
-        await deleteRouteLogApi(record.routeId);
+        await deleteLoginLogApi(record.id);
         reload();
       }
 
