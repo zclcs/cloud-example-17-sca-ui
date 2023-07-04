@@ -48,11 +48,11 @@
           autoSubmitOnEnter: true,
         },
         beforeFetch(info) {
-          if (info.createTime) {
-            const createTime = info.createTime;
-            info.createTime = undefined;
-            info.createTimeFrom = createTime[0];
-            info.createTimeTo = createTime[1];
+          if (info.requestTime) {
+            const requestTime = info.requestTime;
+            info.requestTime = undefined;
+            info.requestTimeFrom = requestTime[0];
+            info.requestTimeTo = requestTime[1];
           }
           return info;
         },
