@@ -73,7 +73,7 @@ export const checkMenuCode = (params: any) =>
   );
 export const checkDeptName = (params: any) =>
   defHttpWithTransform.get(
-    { url: '/system/menu/checkDeptName', params },
+    { url: '/system/dept/checkDeptName', params },
     { errorMessageMode: 'none' },
   );
 export const checkDeptCode = (params: any) =>

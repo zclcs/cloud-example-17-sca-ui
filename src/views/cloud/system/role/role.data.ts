@@ -97,6 +97,7 @@ export const formSchema: FormSchema[] = [
     field: 'menuIds',
     slot: 'menu',
     component: 'Input',
+    required: true,
   },
   {
     label: '备注',
