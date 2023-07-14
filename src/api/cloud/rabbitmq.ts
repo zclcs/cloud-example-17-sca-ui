@@ -1,7 +1,7 @@
 import { defHttpWithTransform } from '/@/utils/http/axios';
 
 enum Api {
-  RABBITMQ = '/system/rabbitmq',
+  RABBITMQ = '/maintenance/rabbitmq',
 }
 
 export const getExchangePage = (params: any) =>

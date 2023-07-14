@@ -1,7 +1,7 @@
 import { defHttpWithTransform } from '/@/utils/http/axios';
 
 enum Api {
-  Redis = '/system/redis',
+  Redis = '/maintenance/redis',
 }
 
 export const deleteRedisApi = (ids: String) =>

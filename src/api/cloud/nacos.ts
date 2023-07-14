@@ -2,7 +2,7 @@ import { defHttpWithTransform } from '/@/utils/http/axios';
 import { ContentTypeEnum } from '/@/enums/httpEnum';
 
 enum Api {
-  NACOS = '/system/nacos',
+  NACOS = '/maintenance/nacos',
 }
 
 export const getConfigPage = (params: any) =>

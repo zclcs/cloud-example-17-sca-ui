@@ -1,7 +1,7 @@
 import { defHttpWithTransform } from '/@/utils/http/axios';
 
 enum Api {
-  XXL_JOB = '/system/xxl/job',
+  XXL_JOB = '/maintenance/xxl/job',
 }
 
 export const getJobInfoPage = (params: any) =>

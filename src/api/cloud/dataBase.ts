@@ -1,7 +1,7 @@
 import { defHttpWithTransform } from '/@/utils/http/axios';
 
 enum Api {
-  dataBase = '/system/dataBase',
+  dataBase = '/maintenance/dataBase',
   schema = '/schema',
   select = '/select',
 }
