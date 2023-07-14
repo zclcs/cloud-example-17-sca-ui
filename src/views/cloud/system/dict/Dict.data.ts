@@ -146,6 +146,27 @@ export const formSchema: FormSchema[] = [
     defaultValue: '0',
   },
   {
+    field: 'harPar',
+    label: '是否顶级字典',
+    component: 'RadioButtonGroup',
+    defaultValue: true,
+    componentProps: ({ formModel }) => {
+      return {
+        options: [
+          { label: '是', value: false },
+          { label: '否', value: true },
+        ],
+        onChange(e: any) {
+          if (e) {
+            formModel.parentCode = '0';
+          }
+        },
+      };
+    },
+    required: true,
+    ifShow: ({ values }) => values.type == 1,
+  },
+  {
     field: 'parentValue',
     label: '上级字典',
     component: 'TreeSelect',
@@ -159,7 +180,7 @@ export const formSchema: FormSchema[] = [
       getPopupContainer: () => document.body,
     },
     required: true,
-    ifShow: ({ values }) => values.type == 1,
+    ifShow: ({ values }) => values.type == 1 && values.harPar,
   },
   {
     field: 'whetherSystemDict',

@@ -137,7 +137,7 @@ export const formSchema: FormSchema[] = [
         ],
         onChange(e: any) {
           if (e) {
-            formModel.parentId = undefined;
+            formModel.parentCode = '0';
           }
         },
       };
