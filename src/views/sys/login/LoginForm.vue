@@ -174,8 +174,6 @@
       loading.value = true;
       const userInfo = await userStore.login(
         toRaw({
-          grant_type: 'password',
-          scope: 'server',
           username: formData.username,
           password: formData.password,
           randomStr: formData.randomStr,

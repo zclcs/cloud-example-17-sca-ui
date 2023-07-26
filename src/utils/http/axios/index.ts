@@ -11,7 +11,7 @@ import { useGlobSetting } from '/@/hooks/setting';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { RequestEnum, ResultEnum, ContentTypeEnum } from '/@/enums/httpEnum';
 import { isString, isUnDef, isNull, isEmpty } from '/@/utils/is';
-import { getExpireTime, getReFreshToken, getToken } from '/@/utils/auth';
+import { getExpireTime, getToken } from '/@/utils/auth';
 import { setObjToUrlParams, deepMerge } from '/@/utils';
 import { useErrorLogStoreWithOut } from '/@/store/modules/errorLog';
 import { useI18n } from '/@/hooks/web/useI18n';
@@ -158,20 +158,14 @@ const transform: AxiosTransform = {
     const expireTime = getExpireTime();
     if (expireTime !== 0 && (config as Recordable)?.requestOptions?.withToken !== false) {
       const left = expireTime - new Date().getTime();
-      const refreshToken = getReFreshToken();
       // 5 * 60 * 1000 5 分钟 86339000 测试刷新token
-      if (left < 5 * 60 * 1000 && refreshToken) {
+      if (left < 5 * 60 * 1000) {
         const userStore = useUserStore();
-        try {
-          await userStore.refreshTokenFn();
-        } catch (error) {
-          console.log(error);
-          userStore.setToken(undefined, undefined, 0);
-          if (stp === SessionTimeoutProcessingEnum.PAGE_COVERAGE) {
-            userStore.setSessionTimeout(true);
-          } else {
-            userStore.logout(true);
-          }
+        userStore.setToken(undefined, 0);
+        if (stp === SessionTimeoutProcessingEnum.PAGE_COVERAGE) {
+          userStore.setSessionTimeout(true);
+        } else {
+          userStore.logout(true);
         }
       }
     }

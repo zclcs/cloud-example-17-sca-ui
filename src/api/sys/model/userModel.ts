@@ -2,8 +2,6 @@
  * @description: Login interface parameters
  */
 export interface LoginParams {
-  grant_type: string;
-  scope: string;
   username: string;
   password: string;
   randomStr: string;
@@ -16,14 +14,19 @@ export interface RefreshTokenParams {
 }
 
 /**
+ * @description: 权限code
+ */
+export interface BaseLoginResultModel {
+  data: LoginResultModel;
+}
+
+/**
  * @description: Login interface return value
  */
 export interface LoginResultModel {
-  access_token: string;
-  token_type: string;
-  refresh_token: string;
-  expires_in: number;
-  scope: string[];
+  token: string;
+  expire: number;
+  userinfo: GetUserInfoModel;
 }
 
 /**
@@ -36,7 +39,6 @@ export interface GetUserInfoModel {
   avatar: string;
   desc?: string;
   homePath?: string;
-  roleNames: string[];
 }
 
 /**

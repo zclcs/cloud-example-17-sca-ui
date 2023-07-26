@@ -3,16 +3,10 @@ import type { ErrorMessageMode } from '/#/axios';
 import { defineStore } from 'pinia';
 import { store } from '/@/store';
 import { PageEnum } from '/@/enums/pageEnum';
-import {
-  ROLES_KEY,
-  TOKEN_KEY,
-  USER_INFO_KEY,
-  REFRESH_TOKEN_KEY,
-  EXPIRE_TMIE_KEY,
-} from '/@/enums/cacheEnum';
+import { ROLES_KEY, TOKEN_KEY, USER_INFO_KEY, EXPIRE_TMIE_KEY } from '/@/enums/cacheEnum';
 import { getAuthCache, setAuthCache } from '/@/utils/auth';
 import { GetUserInfoModel, LoginParams } from '/@/api/sys/model/userModel';
-import { doLogout, getUserInfo, loginApi, refreshTokenApi } from '/@/api/sys/user';
+import { doLogout, loginApi } from '/@/api/sys/user';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { router } from '/@/router';
@@ -25,7 +19,6 @@ import { h } from 'vue';
 interface UserState {
   userInfo: Nullable<UserInfo>;
   token?: string;
-  refreshToken?: string;
   roleList: string[];
   sessionTimeout?: boolean;
   lastUpdateTime: number;
@@ -40,8 +33,6 @@ export const useUserStore = defineStore({
     userInfo: null,
     // token
     token: undefined,
-    // refresh token
-    refreshToken: undefined,
     // roleList
     roleList: [],
     // Whether the login expired
@@ -60,9 +51,6 @@ export const useUserStore = defineStore({
     getToken(): string {
       return this.token || getAuthCache<string>(TOKEN_KEY);
     },
-    getReFreshToken(): string {
-      return this.refreshToken || getAuthCache<string>(REFRESH_TOKEN_KEY);
-    },
     getRoleList(): string[] {
       return this.roleList.length > 0 ? this.roleList : getAuthCache<string[]>(ROLES_KEY);
     },
@@ -80,13 +68,11 @@ export const useUserStore = defineStore({
     },
   },
   actions: {
-    setToken(info: string | undefined, refreshToken: string | undefined, expire: number) {
+    setToken(info: string | undefined, expire: number) {
       const expireTimeSe = expire * 1000 + new Date().getTime();
       this.token = info;
-      this.refreshToken = refreshToken;
       this.expireTime = expireTimeSe;
       setAuthCache(TOKEN_KEY, info);
-      setAuthCache(REFRESH_TOKEN_KEY, refreshToken);
       setAuthCache(EXPIRE_TMIE_KEY, expireTimeSe);
     },
     setRoleList(roleList: string[]) {
@@ -107,7 +93,6 @@ export const useUserStore = defineStore({
     resetState() {
       this.userInfo = null;
       this.token = '';
-      this.refreshToken = '';
       this.expireTime = 0;
       this.roleList = [];
       this.sessionTimeout = false;
@@ -123,8 +108,6 @@ export const useUserStore = defineStore({
     ): Promise<GetUserInfoModel | null> {
       const { goHome = true, mode, ...loginParams } = params;
       const formParams = {
-        grant_type: loginParams.grant_type,
-        scope: loginParams.scope,
         randomStr: loginParams.randomStr,
         code: loginParams.code,
       };
@@ -133,15 +116,20 @@ export const useUserStore = defineStore({
         password: encryption('eXTqsEKIPRsksJSK', loginParams.password),
       };
       const res = await loginApi(formParams, formData, mode);
-      const { access_token, expires_in, refresh_token } = res;
+      const { token, expire, userinfo } = res.data;
+      console.log(res);
+      console.log(userinfo);
       // save token
-      this.setToken(access_token, refresh_token, expires_in);
+      this.setToken(token, expire);
+      this.setUserInfo(userinfo);
+      console.log(this.getUserInfo);
       return this.afterLoginAction(goHome);
     },
     async afterLoginAction(goHome?: boolean): Promise<GetUserInfoModel | null> {
       if (!this.getToken) return null;
       // get user info
       const userInfo = await this.getUserInfoAction();
+      console.log(userInfo);
 
       const sessionTimeout = this.sessionTimeout;
       if (sessionTimeout) {
@@ -150,6 +138,7 @@ export const useUserStore = defineStore({
         const permissionStore = usePermissionStore();
         if (!permissionStore.isDynamicAddedRoute) {
           const routes = await permissionStore.buildRoutesAction();
+          console.log(routes);
           routes.forEach((route) => {
             router.addRoute(route as unknown as RouteRecordRaw);
           });
@@ -161,27 +150,7 @@ export const useUserStore = defineStore({
       return userInfo;
     },
     async getUserInfoAction(): Promise<UserInfo> {
-      const userInfo = await getUserInfo();
-      this.setUserInfo(userInfo);
-      const { roleNames } = userInfo;
-      this.setRoleList(roleNames);
-      return userInfo;
-    },
-    /**
-     * @description: refresh
-     */
-    async refreshTokenFn() {
-      const data = await refreshTokenApi(
-        {
-          grant_type: 'refresh_token',
-        },
-        {
-          refresh_token: this.getReFreshToken,
-        },
-      );
-      const { access_token, expires_in, refresh_token } = data;
-      // save token
-      this.setToken(access_token, refresh_token, expires_in);
+      return this.getUserInfo;
     },
     /**
      * @description: logout
@@ -192,7 +161,7 @@ export const useUserStore = defineStore({
       } catch {
         console.log('注销Token失败');
       }
-      this.setToken(undefined, undefined, 0);
+      this.setToken(undefined, 0);
       this.setSessionTimeout(false);
       this.setUserInfo(null);
       goLogin && router.push(PageEnum.BASE_LOGIN);
