@@ -30,11 +30,6 @@ export function checkStatus(
     case 401:
       userStore.setToken(undefined, 0);
       errMessage = msg || t('sys.api.errMsg401');
-      if (stp === SessionTimeoutProcessingEnum.PAGE_COVERAGE) {
-        userStore.setSessionTimeout(true);
-      } else {
-        userStore.logout(true);
-      }
       break;
     case 424:
       userStore.setToken(undefined, 0);
