@@ -11,16 +11,14 @@ import { useGlobSetting } from '/@/hooks/setting';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { RequestEnum, ResultEnum, ContentTypeEnum } from '/@/enums/httpEnum';
 import { isString, isUnDef, isNull, isEmpty } from '/@/utils/is';
-import { getExpireTime, getToken } from '/@/utils/auth';
+import { getToken } from '/@/utils/auth';
 import { setObjToUrlParams, deepMerge } from '/@/utils';
 import { useErrorLogStoreWithOut } from '/@/store/modules/errorLog';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { joinTimestamp, formatRequestDate } from './helper';
-import { useUserStore } from '/@/store/modules/user';
 import { AxiosRetry } from '/@/utils/http/axios/axiosRetry';
 import projectSetting from '/@/settings/projectSetting';
 import axios from 'axios';
-import { SessionTimeoutProcessingEnum } from '/@/enums/appEnum';
 
 const globSetting = useGlobSetting();
 const urlPrefix = globSetting.urlPrefix;
@@ -154,21 +152,6 @@ const transform: AxiosTransform = {
    * @description: 请求拦截器处理
    */
   requestInterceptors: async (config, options) => {
-    // 请求之前处理config
-    const expireTime = getExpireTime();
-    if (expireTime !== 0 && (config as Recordable)?.requestOptions?.withToken !== false) {
-      const left = expireTime - new Date().getTime();
-      // 5 * 60 * 1000 5 分钟 86339000 测试刷新token
-      if (left < 5 * 60 * 1000) {
-        const userStore = useUserStore();
-        userStore.setToken(undefined, 0);
-        if (stp === SessionTimeoutProcessingEnum.PAGE_COVERAGE) {
-          userStore.setSessionTimeout(true);
-        } else {
-          userStore.logout(true);
-        }
-      }
-    }
     // 请求之前处理config
     const token = getToken();
     if (token) {
