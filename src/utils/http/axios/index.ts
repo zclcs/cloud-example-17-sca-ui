@@ -16,14 +16,11 @@ import { setObjToUrlParams, deepMerge } from '/@/utils';
 import { useErrorLogStoreWithOut } from '/@/store/modules/errorLog';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { joinTimestamp, formatRequestDate } from './helper';
-import { AxiosRetry } from '/@/utils/http/axios/axiosRetry';
-import projectSetting from '/@/settings/projectSetting';
 import axios from 'axios';
 
 const globSetting = useGlobSetting();
 const urlPrefix = globSetting.urlPrefix;
 const { createMessage, createErrorModal, createSuccessModal } = useMessage();
-const stp = projectSetting.sessionTimeoutProcessing;
 
 /**
  * @description: 数据处理，方便区分多种处理方式
@@ -216,14 +213,6 @@ const transform: AxiosTransform = {
     if (msg != '') {
       return Promise.reject(response);
     }
-
-    // 添加自动重试机制 保险起见 只针对GET请求
-    const retryRequest = new AxiosRetry();
-    const { isOpenRetry } = config.requestOptions.retryRequest;
-    config.method?.toUpperCase() === RequestEnum.GET &&
-      isOpenRetry &&
-      // @ts-ignore
-      retryRequest.retry(axiosInstance, error);
     return Promise.reject(error);
   },
 };
@@ -271,7 +260,7 @@ function createAxios(opt?: Partial<CreateAxiosOptions>) {
           // 是否携带token
           withToken: true,
           retryRequest: {
-            isOpenRetry: true,
+            isOpenRetry: false,
             count: 5,
             waitTime: 100,
           },
