@@ -117,19 +117,15 @@ export const useUserStore = defineStore({
       };
       const res = await loginApi(formParams, formData, mode);
       const { token, expire, userinfo } = res.data;
-      console.log(res);
-      console.log(userinfo);
       // save token
       this.setToken(token, expire);
       this.setUserInfo(userinfo);
-      console.log(this.getUserInfo);
       return this.afterLoginAction(goHome);
     },
     async afterLoginAction(goHome?: boolean): Promise<GetUserInfoModel | null> {
       if (!this.getToken) return null;
       // get user info
       const userInfo = await this.getUserInfoAction();
-      console.log(userInfo);
 
       const sessionTimeout = this.sessionTimeout;
       if (sessionTimeout) {
@@ -138,7 +134,6 @@ export const useUserStore = defineStore({
         const permissionStore = usePermissionStore();
         if (!permissionStore.isDynamicAddedRoute) {
           const routes = await permissionStore.buildRoutesAction();
-          console.log(routes);
           routes.forEach((route) => {
             router.addRoute(route as unknown as RouteRecordRaw);
           });
