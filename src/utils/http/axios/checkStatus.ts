@@ -30,7 +30,7 @@ export function checkStatus(
       errMessage = msg || t('sys.api.errMsg401');
       break;
     case 424:
-      userStore.setToken(undefined, 0);
+      userStore.setToken(undefined);
       userStore.setSessionTimeout(false);
       userStore.setUserInfo(null);
       router.push(PageEnum.BASE_LOGIN);

@@ -1,7 +1,7 @@
 import { BasicColumn } from '/@/components/Table';
 import { FormSchema } from '/@/components/Table';
 import { getDict } from '/@/api/cloud/dictCache';
-import { formatToTime } from '/@/utils/dateUtil';
+// import { formatToTime } from '/@/utils/dateUtil';
 
 export const columns: BasicColumn[] = [
   {
@@ -195,7 +195,8 @@ export const formSchema: FormSchema[] = [
     label: '限制时间起',
     component: 'TimePicker',
     componentProps: { style: { width: '100%' }, valueFormat: 'HH:mm:ss' },
-    defaultValue: formatToTime('00:00:00'),
+    helpMessage: ['不填默认: 00:00:00'],
+    // defaultValue: formatToTime('00:00:00'),
     //required: true,
     //ifShow: ({ values }) => enable(values.type),
   },
@@ -204,7 +205,8 @@ export const formSchema: FormSchema[] = [
     label: '限制时间止',
     component: 'TimePicker',
     componentProps: { style: { width: '100%' }, valueFormat: 'HH:mm:ss' },
-    defaultValue: formatToTime('23:59:59'),
+    helpMessage: ['不填默认: 23:59:59'],
+    // defaultValue: formatToTime('23:59:59'),
     //required: true,
     //ifShow: ({ values }) => enable(values.type),
   },

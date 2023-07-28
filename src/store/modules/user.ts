@@ -22,7 +22,6 @@ interface UserState {
   roleList: string[];
   sessionTimeout?: boolean;
   lastUpdateTime: number;
-  expireTime: number;
   key: string;
 }
 
@@ -39,8 +38,6 @@ export const useUserStore = defineStore({
     sessionTimeout: false,
     // Last fetch time
     lastUpdateTime: 0,
-    // token过期时间
-    expireTime: 0,
     // Last fetch time
     key: '',
   }),
@@ -60,20 +57,14 @@ export const useUserStore = defineStore({
     getLastUpdateTime(): number {
       return this.lastUpdateTime;
     },
-    getExpireTime(): number {
-      return this.expireTime || getAuthCache<number>(EXPIRE_TMIE_KEY);
-    },
     getKey(): string {
       return this.key;
     },
   },
   actions: {
-    setToken(info: string | undefined, expire: number) {
-      const expireTimeSe = expire * 1000 + new Date().getTime();
-      this.token = info;
-      this.expireTime = expireTimeSe;
+    setToken(info: string | undefined) {
+      this.token = info ? info : '';
       setAuthCache(TOKEN_KEY, info);
-      setAuthCache(EXPIRE_TMIE_KEY, expireTimeSe);
     },
     setRoleList(roleList: string[]) {
       this.roleList = roleList;
@@ -93,7 +84,6 @@ export const useUserStore = defineStore({
     resetState() {
       this.userInfo = null;
       this.token = '';
-      this.expireTime = 0;
       this.roleList = [];
       this.sessionTimeout = false;
     },
@@ -116,9 +106,9 @@ export const useUserStore = defineStore({
         password: encryption('eXTqsEKIPRsksJSK', loginParams.password),
       };
       const res = await loginApi(formParams, formData, mode);
-      const { token, expire, userinfo } = res.data;
+      const { token, userinfo } = res.data;
       // save token
-      this.setToken(token, expire);
+      this.setToken(token);
       this.setUserInfo(userinfo);
       return this.afterLoginAction(goHome);
     },
@@ -156,7 +146,7 @@ export const useUserStore = defineStore({
       } catch {
         console.log('注销Token失败');
       }
-      this.setToken(undefined, 0);
+      this.setToken(undefined);
       this.setSessionTimeout(false);
       this.setUserInfo(null);
       goLogin && router.push(PageEnum.BASE_LOGIN);
