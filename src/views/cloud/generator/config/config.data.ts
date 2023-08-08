@@ -44,6 +44,8 @@ export const searchFormSchema: FormSchema[] = [
   },
 ];
 
+const isYes = (type: string) => type === '1';
+
 export const formSchema: FormSchema[] = [
   {
     field: 'id',
@@ -145,21 +147,12 @@ export const formSchema: FormSchema[] = [
     label: '是否去除前缀',
     component: 'RadioButtonGroup',
     defaultValue: '0',
-    componentProps: ({ formActionType, formModel }) => {
+    componentProps: () => {
       return {
         options: [
           { label: '否', value: '0' },
           { label: '是', value: '1' },
         ],
-        onChange: async () => {
-          if (formActionType !== undefined) {
-            const { updateSchema } = formActionType;
-            updateSchema({
-              field: 'trimValue',
-              ifShow: formModel.isTrim === '1',
-            });
-          }
-        },
       };
     },
   },
@@ -168,6 +161,7 @@ export const formSchema: FormSchema[] = [
     label: '前缀内容',
     component: 'Input',
     required: true,
+    ifShow: ({ values }) => isYes(values.isTrim),
   },
   {
     field: 'excludeColumns',
