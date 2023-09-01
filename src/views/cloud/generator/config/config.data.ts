@@ -1,3 +1,4 @@
+import { getDict } from '/@/api/cloud/dictCache';
 import { checkServerName } from '/@/api/cloud/generatorConfig';
 import { BasicColumn } from '/@/components/Table';
 import { FormSchema } from '/@/components/Table';
@@ -11,17 +12,22 @@ export const columns: BasicColumn[] = [
   {
     title: '作者',
     dataIndex: 'author',
-    width: 200,
+    width: 80,
+  },
+  {
+    title: '版本',
+    dataIndex: 'genVersionText',
+    width: 80,
   },
   {
     title: '是否去除前缀',
     dataIndex: 'isTrimText',
-    width: 200,
+    width: 80,
   },
   {
     title: '前缀内容',
     dataIndex: 'trimValue',
-    width: 200,
+    width: 80,
   },
   {
     title: '需要排除的字段',
@@ -31,7 +37,7 @@ export const columns: BasicColumn[] = [
   {
     title: '创建时间',
     dataIndex: 'createAt',
-    width: 180,
+    width: 100,
   },
 ];
 
@@ -45,6 +51,7 @@ export const searchFormSchema: FormSchema[] = [
 ];
 
 const isYes = (type: string) => type === '1';
+const isFlex = (type: string) => type === '02';
 
 export const formSchema: FormSchema[] = [
   {
@@ -83,6 +90,19 @@ export const formSchema: FormSchema[] = [
     },
   },
   {
+    field: 'genVersion',
+    label: '版本',
+    component: 'ApiSelect',
+    componentProps: {
+      api: getDict,
+      params: { dictName: 'generate.version' },
+      labelField: 'title',
+      valueField: 'value',
+    },
+    defaultValue: '02',
+    required: true,
+  },
+  {
     field: 'author',
     label: '作者',
     component: 'Input',
@@ -111,6 +131,20 @@ export const formSchema: FormSchema[] = [
     label: '出参包名',
     component: 'Input',
     required: true,
+  },
+  {
+    field: 'cacheVoPackage',
+    label: '缓存类包名',
+    component: 'Input',
+    required: true,
+    ifShow: ({ values }) => isFlex(values.genVersion),
+  },
+  {
+    field: 'excelVoPackage',
+    label: 'excel类包名',
+    component: 'Input',
+    required: true,
+    ifShow: ({ values }) => isFlex(values.genVersion),
   },
   {
     field: 'mapperPackage',
