@@ -9,7 +9,7 @@
   import { BasicForm, useForm } from '/@/components/Form/index';
   import { accountFormSchema } from './account.data';
   import { getDeptTree } from '/@/api/cloud/system';
-  import { createUserApi, updateUserApi } from '/@/api/cloud/user';
+  import { createUserApi, updateUserApi, getUserOne } from '/@/api/cloud/user';
 
   export default defineComponent({
     name: 'AccountModal',
@@ -37,8 +37,9 @@
 
         if (unref(isUpdate)) {
           userId.value = data.record.userId;
+          const one = await getUserOne({ userId: data.record.userId });
           setFieldsValue({
-            ...data.record,
+            ...one,
           });
         }
         clearValidate();

@@ -22,6 +22,9 @@ export const accountInfoApi = () =>
 export const sessionTimeoutApi = () =>
   defHttpWithTransform.post<void>({ url: Api.SESSION_TIMEOUT });
 
+export const getUserOne = (params: any) =>
+  defHttpWithTransform.get<any>({ url: Api.USER + '/one', params });
+
 export const createUserApi = (params: UserInfoModel) =>
   defHttpWithTransform.post<void>({
     url: Api.USER,

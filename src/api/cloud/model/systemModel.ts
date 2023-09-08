@@ -1,6 +1,7 @@
 import { BasicPageParams, BasicFetchResult } from '/@/api/model/baseModel';
 
 export type UserParams = BasicPageParams & {
+  userId?: number;
   username?: string;
 };
 
