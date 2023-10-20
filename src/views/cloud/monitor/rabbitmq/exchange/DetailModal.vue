@@ -8,7 +8,7 @@
   >
     <BasicForm @register="registerForm">
       <template #exchangeDetail="{ model, field }">
-        <CodeEditor v-model:value="model[field]" :mode="modeValue" :readonly="readonly" />
+        <h4 style="white-space: pre-line">{{ model[field] }}</h4>
       </template>
     </BasicForm>
   </BasicModal>
@@ -18,19 +18,16 @@
   import { BasicModal, useModalInner } from '/@/components/Modal';
   import { BasicForm, useForm } from '/@/components/Form/index';
   import { schema } from './table.data';
-  import { CodeEditor, MODE } from '/@/components/CodeEditor';
   import { getExchangeDetail } from '/@/api/cloud/rabbitmq';
   export default defineComponent({
     name: 'DetailModal',
-    components: { BasicModal, CodeEditor, BasicForm },
+    components: { BasicModal, BasicForm },
     emits: ['register'],
     setup(_) {
-      const readonly = ref(true);
       const type = ref('');
-      const modeValue = ref<MODE>(MODE.JSON);
       const dataModal = ref<Recordable>({});
 
-      const [registerForm, { setFieldsValue, updateSchema }] = useForm({
+      const [registerForm, { setFieldsValue, updateSchema, resetFields }] = useForm({
         labelWidth: 100,
         baseColProps: { span: 24 },
         schemas: schema,
@@ -38,6 +35,7 @@
       });
 
       const [register, { setModalProps }] = useModalInner(async (data) => {
+        resetFields();
         type.value = data.type;
         setModalProps({ confirmLoading: false });
         if (unref(type) === 'exchangeDetail') {
@@ -82,8 +80,6 @@
         register,
         dataModal,
         schema,
-        modeValue,
-        readonly,
         registerForm,
       };
     },
