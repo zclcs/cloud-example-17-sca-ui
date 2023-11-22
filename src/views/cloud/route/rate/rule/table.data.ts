@@ -117,7 +117,7 @@ export const formSchema: FormSchema[] = [
     field: 'requestUri',
     label: '请求URI',
     component: 'Input',
-    helpMessage: ['不支持通配符，原服务url（即去掉前缀的url）'],
+    helpMessage: ['不支持通配符'],
     required: true,
   },
   {
