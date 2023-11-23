@@ -5,7 +5,7 @@ enum Api {
   Redis = '/maintenance/redis',
 }
 
-export const deleteRedisApi = (params: String) =>
+export const deleteRedisApi = (params: any) =>
   defHttpWithTransform.delete<void>({
     url: Api.Redis,
     headers: {

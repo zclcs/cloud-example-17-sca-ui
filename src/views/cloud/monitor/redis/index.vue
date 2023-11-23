@@ -77,7 +77,7 @@
       }
 
       async function handleDelete(record: Recordable) {
-        await deleteRedisApi(record.key);
+        await deleteRedisApi({ keys: record.key });
         reload();
       }
 
