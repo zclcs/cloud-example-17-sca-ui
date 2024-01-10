@@ -47,7 +47,7 @@ export class AesEncryption {
  *加密处理
  */
 export const encryption = (encodeKey: string, text: string) => {
-  const key = CryptoJS.enc.Latin1.parse(encodeKey);
+  const key = CryptoJS.enc.Utf8.parse(encodeKey);
   const iv = key;
   // 加密
   const encrypted = CryptoJS.AES.encrypt(text, key, {
