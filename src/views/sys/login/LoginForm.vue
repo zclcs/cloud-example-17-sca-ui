@@ -164,7 +164,7 @@
   }
 
   function handleCodeUrl(uuid: string) {
-    return globSetting.apiUrl + '/code?randomStr=' + uuid;
+    return globSetting.apiUrl + '/system/code?randomStr=' + uuid;
   }
 
   async function handleLogin() {
@@ -194,10 +194,8 @@
         content: error.data.msg || t('sys.api.networkExceptionMsg'),
         getContainer: () => document.body.querySelector(`.${prefixCls}`) || document.body,
       });
-      if (error.data.msg === '验证码已过期') {
-        handleChangeCode();
-      }
     } finally {
+      handleChangeCode();
       loading.value = false;
     }
   }
