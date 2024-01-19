@@ -17,7 +17,7 @@ export const columns: BasicColumn[] = [
   },
   {
     title: '排序',
-    dataIndex: 'orderNum',
+    dataIndex: 'extra.orderNum',
     width: 50,
   },
   // {
