@@ -23,36 +23,54 @@ export const columns: BasicColumn[] = [
     dataIndex: 'icon',
     width: 50,
     customRender: ({ record }) => {
-      return h(Icon, { icon: record.icon });
+      return h(Icon, { icon: record.extra.icon });
     },
   },
   {
     title: '权限标识',
     dataIndex: 'perms',
     width: 180,
+    customRender: ({ record }) => {
+      return record.extra.perms;
+    },
   },
   {
     title: '菜单类型',
     dataIndex: 'typeText',
     width: 80,
+    customRender: ({ record }) => {
+      return record.extra.typeText;
+    },
   },
   {
     title: '组件',
     dataIndex: 'component',
+    customRender: ({ record }) => {
+      return record.extra.component;
+    },
   },
   {
     title: '路由地址',
     dataIndex: 'path',
+    customRender: ({ record }) => {
+      return record.extra.path;
+    },
   },
   {
     title: '排序',
     dataIndex: 'orderNum',
     width: 50,
+    customRender: ({ record }) => {
+      return record.extra.orderNum;
+    },
   },
   {
     title: '创建时间',
     dataIndex: 'createAt',
     width: 180,
+    customRender: ({ record }) => {
+      return record.extra.createAt;
+    },
   },
 ];
 

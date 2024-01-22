@@ -17,8 +17,11 @@ export const columns: BasicColumn[] = [
   },
   {
     title: '排序',
-    dataIndex: 'extra.orderNum',
+    dataIndex: 'orderNum',
     width: 50,
+    customRender: ({ record }) => {
+      return record.extra.orderNum;
+    },
   },
   // {
   //   title: '状态',
@@ -36,6 +39,9 @@ export const columns: BasicColumn[] = [
     title: '创建时间',
     dataIndex: 'createTime',
     width: 180,
+    customRender: ({ record }) => {
+      return record.extra.createTime;
+    },
   },
 ];
 
@@ -129,18 +135,11 @@ export const formSchema: FormSchema[] = [
     label: '是否顶级部门',
     component: 'RadioButtonGroup',
     defaultValue: true,
-    componentProps: ({ formModel }) => {
-      return {
-        options: [
-          { label: '是', value: false },
-          { label: '否', value: true },
-        ],
-        onChange(e: any) {
-          if (e) {
-            formModel.parentCode = '0';
-          }
-        },
-      };
+    componentProps: {
+      options: [
+        { label: '是', value: false },
+        { label: '否', value: true },
+      ],
     },
     required: true,
   },

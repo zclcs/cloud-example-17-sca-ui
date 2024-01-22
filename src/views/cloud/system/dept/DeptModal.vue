@@ -34,6 +34,10 @@
 
         if (unref(isUpdate)) {
           rowId.value = data.record.id;
+          data.record.createAt = data.record.extra.createAt;
+          data.record.orderNum = data.record.extra.orderNum;
+          data.record.harPar = data.record.extra.harPar;
+          data.record.deptName = data.record.extra.deptName;
           setFieldsValue({
             ...data.record,
           });

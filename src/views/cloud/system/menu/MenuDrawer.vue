@@ -42,6 +42,20 @@
 
         if (unref(isUpdate)) {
           rowId.value = data.record.id;
+          data.record.keepAliveName = data.record.extra.keepAliveName;
+          data.record.path = data.record.extra.path;
+          data.record.component = data.record.extra.component;
+          data.record.redirect = data.record.extra.redirect;
+          data.record.perms = data.record.extra.perms;
+          data.record.icon = data.record.extra.icon;
+          data.record.type = data.record.extra.type;
+          data.record.hideMenu = data.record.extra.hideMenu;
+          data.record.ignoreKeepAlive = data.record.extra.ignoreKeepAlive;
+          data.record.hideBreadcrumb = data.record.extra.hideBreadcrumb;
+          data.record.hideChildrenInMenu = data.record.extra.hideChildrenInMenu;
+          data.record.currentActiveMenu = data.record.extra.currentActiveMenu;
+          data.record.createAt = data.record.extra.createAt;
+          data.record.orderNum = data.record.extra.orderNum;
           setFieldsValue({
             ...data.record,
           });
@@ -68,6 +82,9 @@
           values.label = undefined;
           values.menuCode = values.code;
           values.code = undefined;
+          if (values.parentCode === undefined) {
+            values.parentCode = '0';
+          }
           if (unref(isUpdate)) {
             values.menuId = rowId.value;
             await updateMenuApi(values);
